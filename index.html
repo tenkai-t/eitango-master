@@ -241,6 +241,45 @@
       color: #718096;
     }
 
+    .speak-btn {
+      margin-top: 16px;
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    }
+
+    .speak-btn:active {
+      transform: scale(0.96);
+    }
+
+    .dict-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .dict-speak-btn {
+      background: #EBF3F5;
+      border: 2px solid #CBD5E0;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .dict-speak-btn:active {
+      transform: scale(0.94);
+    }
+
     .options-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -471,6 +510,7 @@
       <div class="card-display">
         <span class="type-tag" id="typeTag">単語</span>
         <div class="word-text" id="questionWord">apple</div>
+        <button class="speak-btn" id="speakBtn" onclick="speakCurrent()">🔊 発音をきく</button>
       </div>
 
       <div class="options-grid" id="optionsContainer">
@@ -777,6 +817,29 @@ function playSound(type) {
   }
 }
 
+// 音声再生（ブラウザ標準の読み上げ機能を使用）
+function speakText(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-US';
+  utterance.rate = 0.9;
+  const voices = speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.indexOf('en') === 0);
+  if (enVoice) utterance.voice = enVoice;
+  speechSynthesis.speak(utterance);
+}
+
+function speakCurrent() {
+  const q = currentQuestions[currentQuestionIndex];
+  if (q) speakText(q.word);
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
 // 画面切り替え
 function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -954,8 +1017,12 @@ function filterDict(grade, tabElem) {
         <div class="dict-en">${q.word} <span style="font-size:0.75rem; color:#888;">(${q.type})</span></div>
         <div class="dict-jp">${q.meaning}</div>
       </div>
-      <div class="dict-star ${isLearned ? 'learned' : ''}">${isLearned ? '★ マスター' : '☆'}</div>
+      <div class="dict-right">
+        <button class="dict-speak-btn" title="発音をきく">🔊</button>
+        <div class="dict-star ${isLearned ? 'learned' : ''}">${isLearned ? '★ マスター' : '☆'}</div>
+      </div>
     `;
+    item.querySelector('.dict-speak-btn').onclick = () => speakText(q.word);
     listContainer.appendChild(item);
   });
 }
