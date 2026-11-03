@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>えいごパズルマスター - 英検単語・イディオム学習</title>
+  <style>
+    :root {
+      --primary: #FF6B6B;
+      --secondary: #4ECDC4;
+      --accent: #FFE66D;
+      --dark: #2C3E50;
+      --light: #F7F9FC;
+      --success: #2ECC71;
+      --danger: #E74C3C;
+      --card-bg: #FFFFFF;
+      --radius: 16px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: #EBF3F5;
+      color: var(--dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 650px;
+      background: var(--light);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      min-height: 600px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--secondary), #2AB7CA);
+      color: white;
+      padding: 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .nav-btn {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.25);
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.85rem;
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    main {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ホーム画面 */
+    .hero-box {
+      text-align: center;
+      padding: 20px 10px;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-title {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      color: var(--dark);
+    }
+
+    .hero-desc {
+      font-size: 0.95rem;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .menu-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      background: white;
+      border: 3px solid #E0E6ED;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-grade-5 { border-color: #4ECDC4; color: #16A085; }
+    .btn-grade-4 { border-color: #FFD166; color: #D68910; }
+    .btn-grade-3 { border-color: #FF6B6B; color: #C0392B; }
+
+    .btn-dict {
+      background: #34495E;
+      color: white;
+      border: none;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* ゲーム画面 */
+    .game-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .badge {
+      background: #EBF3F5;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .card-display {
+      background: white;
+      border-radius: var(--radius);
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border: 3px solid #E2E8F0;
+      position: relative;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .type-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      background: #EDF2F7;
+      color: #4A5568;
+    }
+
+    .word-text {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .word-phonetic {
+      font-size: 0.9rem;
+      color: #718096;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .opt-btn {
+      background: white;
+      border: 2px solid #CBD5E0;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .opt-btn:hover {
+      background: #F7FAFC;
+      border-color: #A0AEC0;
+    }
+
+    .opt-btn.correct {
+      background: #DEF7EC !important;
+      border-color: #31C48D !important;
+      color: #03543F !important;
+    }
+
+    .opt-btn.wrong {
+      background: #FDE8E8 !important;
+      border-color: #F98080 !important;
+      color: #9B1C1C !important;
+    }
+
+    /* 解説ポップアップ/カード */
+    .explain-card {
+      display: none;
+      background: #FFFBEB;
+      border: 2px solid #FCD34D;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .explain-card.active {
+      display: block;
+    }
+
+    .explain-title {
+      font-weight: bold;
+      color: #92400E;
+      margin-bottom: 4px;
+    }
+
+    .explain-ex {
+      color: #4B5563;
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .next-btn {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .next-btn.active {
+      display: block;
+    }
+
+    /* クリア・結果画面 */
+    .result-box {
+      background: white;
+      border-radius: var(--radius);
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .result-rank {
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+
+    .result-score {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+    }
+
+    /* ずかん画面 */
+    .dict-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .dict-tab {
+      flex: 1;
+      padding: 8px;
+      background: white;
+      border: 2px solid #E2E8F0;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .dict-tab.active {
+      background: var(--secondary);
+      color: white;
+      border-color: var(--secondary);
+    }
+
+    .dict-list {
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .dict-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #EDF2F7;
+    }
+
+    .dict-item:last-child {
+      border-bottom: none;
+    }
+
+    .dict-en {
+      font-weight: bold;
+      color: var(--dark);
+    }
+
+    .dict-jp {
+      font-size: 0.85rem;
+      color: #4A5568;
+    }
+
+    .dict-star {
+      color: #CBD5E0;
+    }
+
+    .dict-star.learned {
+      color: #F6AD55;
+    }
+
+    ruby rt {
+      font-size: 0.6em;
+      color: #718096;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <button class="nav-btn" id="homeBtn" onclick="showScreen('homeScreen')" style="display:none;">ホーム</button>
+    <h1>えいごパズルマスター</h1>
+  </header>
+
+  <main>
+    <!-- ホーム画面 -->
+    <div id="homeScreen" class="screen active">
+      <div class="hero-box">
+        <h2 class="hero-title">たのしく英検の単語・イディオムをおぼえよう！</h2>
+        <p class="hero-desc">タイム制限なし！自分のペースでじっくり選んでまなべるよ。</p>
+      </div>
+
+      <div class="menu-group">
+        <button class="btn btn-grade-5" onclick="startGame(5)">
+          <span>英検 5級レベル</span>
+          <span style="font-size:0.85rem; font-weight:normal;">(基礎単語・イディオム 68問)</span>
+        </button>
+        <button class="btn btn-grade-4" onclick="startGame(4)">
+          <span>英検 4級レベル</span>
+          <span style="font-size:0.85rem; font-weight:normal;">(日常生活・過去形 67問)</span>
+        </button>
+        <button class="btn btn-grade-3" onclick="startGame(3)">
+          <span>英検 3級レベル</span>
+          <span style="font-size:0.85rem; font-weight:normal;">(中学レベル・重要熟語 66問)</span>
+        </button>
+        <button class="btn btn-dict" onclick="openDictionary()">
+          <span>📖 えいご単語ずかん</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- クイズ画面 -->
+    <div id="gameScreen" class="screen">
+      <div class="game-status">
+        <span class="badge" id="gradeBadge">5級</span>
+        <span id="progressText">第 1 / 10 問</span>
+        <span id="scoreText">スコア: 0</span>
+      </div>
+
+      <div class="card-display">
+        <span class="type-tag" id="typeTag">単語</span>
+        <div class="word-text" id="questionWord">apple</div>
+      </div>
+
+      <div class="options-grid" id="optionsContainer">
+        <!-- 4択ボタンがここに動的に挿入されます -->
+      </div>
+
+      <div class="explain-card" id="explainCard">
+        <div class="explain-title" id="explainTitle">せいかい！</div>
+        <div id="explainMeaning">意味: りんご</div>
+        <div class="explain-ex" id="explainExample">I like apples. (わたしはりんごがすきです)</div>
+      </div>
+
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">つぎの問題へ ➔</button>
+    </div>
+
+    <!-- クリア結果画面 -->
+    <div id="resultScreen" class="screen">
+      <div class="result-box">
+        <h2>ステージクリア！</h2>
+        <div class="result-rank" id="resultRank">S</div>
+        <div class="result-score" id="resultScore">10問ちゅう 10問 せいかい！</div>
+        <p id="resultComment" style="color:#666; margin-bottom:20px;">すばらしい！かんぺきです！</p>
+        <button class="btn btn-grade-5" style="justify-content:center;" onclick="showScreen('homeScreen')">ホームにもどる</button>
+      </div>
+    </div>
+
+    <!-- 図鑑画面 -->
+    <div id="dictScreen" class="screen">
+      <h2>単語・イディオムずかん</h2>
+      <p style="font-size:0.85rem; color:#666;">クイズでせいかいした問題には ⭐ がつくよ！</p>
+      
+      <div class="dict-controls">
+        <div class="dict-tab active" onclick="filterDict(5, this)">5級</div>
+        <div class="dict-tab" onclick="filterDict(4, this)">4級</div>
+        <div class="dict-tab" onclick="filterDict(3, this)">3級</div>
+      </div>
+
+      <div class="dict-list" id="dictList">
+        <!-- 単語リストが挿入されます -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// --- 問題データベース（各級60問以上、合計201問） ---
+const QUESTION_DATABASE = {
+  5: [
+    // 単語（名詞・動詞・形容詞など）
+    { word: "apple", meaning: "<ruby>林檎<rt>りんご</rt></ruby>", options: ["りんご", "みかん", "ばなな", "ぶどう"], type: "単語", example: "I eat an apple. (わたしはりんごを食べます)" },
+    { word: "cat", meaning: "ねこ", options: ["ねこ", "いぬ", "うさぎ", "とり"], type: "単語", example: "The cat is cute. (そのねこはかわいいです)" },
+    { word: "book", meaning: "<ruby>本<rt>ほん</rt></ruby>", options: ["ほん", "ノート", "ペン", "つくえ"], type: "単語", example: "Read a book. (本を読みなさい)" },
+    { word: "school", meaning: "<ruby>学校<rt>がっこう</rt></ruby>", options: ["がっこう", "こうえん", "いえ", "びょういん"], type: "単語", example: "I go to school. (わたしは学校に行きます)" },
+    { word: "friend", meaning: "<ruby>友達<rt>ともだち</rt></ruby>", options: ["ともだち", "せんせい", "かぞく", "あかちゃん"], type: "単語", example: "He is my friend. (彼はいわたしの友達です)" },
+    { word: "teacher", meaning: "<ruby>先生<rt>せんせい</rt></ruby>", options: ["せんせい", "いしゃ", "かしゅ", "がくせい"], type: "単語", example: "She is an English teacher. (彼女は英語の先生です)" },
+    { word: "water", meaning: "<ruby>水<rt>みず</rt></ruby>", options: ["みず", "おちゃ", "ぎゅうにゅう", "ジュース"], type: "単語", example: "Drink some water. (お水を飲みなさい)" },
+    { word: "summer", meaning: "<ruby>夏<rt>なつ</rt></ruby>", options: ["なつ", "はる", "あき", "ふゆ"], type: "単語", example: "I like summer. (わたしは夏が好きです)" },
+    { word: "happy", meaning: "うれしい", options: ["うれしい", "かなしい", "おこっている", "つかれている"], type: "単語", example: "I am very happy. (わたしはとてもうれしいです)" },
+    { word: "run", meaning: "<ruby>走<rt>はし</rt></ruby>る", options: ["はしる", "あるく", "とぶ", "およぐ"], type: "単語", example: "Run fast! (はやく走りなさい！)" },
+    { word: "sun", meaning: "<ruby>太陽<rt>たいよう</rt></ruby>", options: ["たいよう", "つき", "ほし", "くも"], type: "単語", example: "The sun is hot. (太陽はあついです)" },
+    { word: "bird", meaning: "<ruby>鳥<rt>とり</rt></ruby>", options: ["とり", "さかな", "むし", "いぬ"], type: "単語", example: "Look at the bird. (鳥をごらんなさい)" },
+    { word: "music", meaning: "<ruby>音楽<rt>おんがく</rt></ruby>", options: ["おんがく", "えいが", "え", "スポーツ"], type: "単語", example: "I listen to music. (わたしは音楽を聴きます)" },
+    { word: "desk", meaning: "<ruby>机<rt>つくえ</rt></ruby>", options: ["つくえ", "いす", "ベッド", "ドア"], type: "単語", example: "Clean your desk. (つくえをきれいにしなさい)" },
+    { word: "chair", meaning: "<ruby>椅子<rt>いす</rt></ruby>", options: ["いす", "つくえ", "はこ", "かばん"], type: "単語", example: "Sit on the chair. (いすに座りなさい)" },
+    { word: "father", meaning: "<ruby>父<rt>ちち</rt></ruby>（おとうさん）", options: ["おとうさん", "おかあさん", "おにいさん", "おとうと"], type: "単語", example: "My father is tall. (わたしのお父さんは背が高いです)" },
+    { word: "mother", meaning: "<ruby>母<rt>はは</rt></ruby>（おかあさん）", options: ["おかあさん", "おとうさん", "おねえさん", "おばあさん"], type: "単語", example: "My mother is kind. (わたしのお母さんは親切です)" },
+    { word: "house", meaning: "<ruby>家<rt>いえ</rt></ruby>", options: ["いえ", "みせ", "えき", "へや"], type: "単語", example: "This is my house. (ここがわたしの家です)" },
+    { word: "park", meaning: "<ruby>公園<rt>こうえん</rt></ruby>", options: ["こうえん", "プール", "うみ", "やま"], type: "単語", example: "Let's go to the park. (公園に行こう)" },
+    { word: "time", meaning: "<ruby>時間<rt>じかん</rt></ruby>", options: ["じかん", "とけい", "ひづけ", "あさ"], type: "単語", example: "What time is it? (いま何時ですか？)" },
+    { word: "dog", meaning: "<ruby>犬<rt>いぬ</rt></ruby>", options: ["いぬ", "ねこ", "ライオン", "うま"], type: "単語", example: "I have a big dog. (わたしは大きな犬を飼っています)" },
+    { word: "milk", meaning: "<ruby>牛乳<rt>ぎゅうにゅう</rt></ruby>", options: ["ぎゅうにゅう", "ジュース", "みず", "スープ"], type: "単語", example: "Drink your milk. (牛乳をのみなさい)" },
+    { word: "egg", meaning: "<ruby>卵<rt>たまご</rt></ruby>", options: ["たまご", "パン", "にく", "さかな"], type: "単語", example: "I ate an egg. (わたしは卵を食べました)" },
+    { word: "pencil", meaning: "<ruby>鉛筆<rt>えんぴつ</rt></ruby>", options: ["えんぴつ", "消しゴム", "定規", "ふでばこ"], type: "単語", example: "Use this pencil. (この鉛筆を使いなさい)" },
+    { word: "bag", meaning: "<ruby>鞄<rt>かばん</rt></ruby>", options: ["かばん", "さいふ", "ふく", "くつ"], type: "単語", example: "Put it in your bag. (かばんの中に入れなさい)" },
+    { word: "window", meaning: "<ruby>窓<rt>まど</rt></ruby>", options: ["まど", "ドア", "かべ", "ゆか"], type: "単語", example: "Open the window. (窓を開けなさい)" },
+    { word: "door", meaning: "<ruby>扉<rt>とびら</rt></ruby>（ドア）", options: ["ドア", "まど", "やね", "庭"], type: "単語", example: "Close the door. (ドアを閉めなさい)" },
+    { word: "red", meaning: "<ruby>赤<rt>あか</rt></ruby>", options: ["あか", "あお", "きいろ", "みどり"], type: "単語", example: "I like red apples. (赤いリンゴが好きです)" },
+    { word: "blue", meaning: "<ruby>青<rt>あお</rt></ruby>", options: ["あお", "あか", "くろ", "しろ"], type: "単語", example: "The sky is blue. (空は青いです)" },
+    { word: "big", meaning: "<ruby>大<rt>おお</rt></ruby>きい", options: ["おおきい", "ちいさい", "ながい", "みじかい"], type: "単語", example: "That is a big bus. (あれは大きなバスです)" },
+    { word: "small", meaning: "<ruby>小<rt>ちい</rt></ruby>さい", options: ["ちいさい", "おおきい", "たかい", "ひくい"], type: "単語", example: "It is a small bird. (それは小さな鳥です)" },
+    { word: "fast", meaning: "<ruby>速<rt>はや</rt></ruby>い", options: ["はやい", "おそい", "つよい", "よわい"], type: "単語", example: "He can run fast. (彼は速く走ることができます)" },
+    { word: "sing", meaning: "<ruby>歌<rt>うた</rt></ruby>う", options: ["うたう", "おどる", "はなす", "きく"], type: "単語", example: "She can sing well. (彼女は歌がじょうずです)" },
+    { word: "swim", meaning: "<ruby>泳<rt>およ</rt></ruby>ぐ", options: ["およぐ", "はしる", "あるく", "とぶ"], type: "単語", example: "I swim in summer. (夏におよぎます)" },
+    { word: "read", meaning: "<ruby>読<rt>よ</rt></ruby>む", options: ["よむ", "かく", "きく", "みる"], type: "単語", example: "Read this book. (この本を読みなさい)" },
+    { word: "write", meaning: "<ruby>書<rt>か</rt></ruby>く", options: ["かく", "よむ", "はなす", "うたう"], type: "単語", example: "Write your name. (なまえを書きなさい)" },
+    { word: "speak", meaning: "<ruby>話<rt>はな</rt></ruby>す", options: ["はなす", "きく", "みる", "たべる"], type: "単語", example: "I speak Japanese. (わたしは日本語を話します)" },
+    { word: "listen", meaning: "<ruby>聴<rt>き</rt></ruby>く", options: ["きく", "みる", "かく", "よむ"], type: "単語", example: "Listen to me. (わたしの言うことを聞きなさい)" },
+    { word: "look", meaning: "<ruby>見<rt>み</rt></ruby>る", options: ["みる", "きく", "さわる", "嗅ぐ"], type: "単語", example: "Look at the sky. (空を見なさい)" },
+    { word: "eat", meaning: "<ruby>食<rt>た</rt></ruby>べる", options: ["たべる", "のむ", "つくる", "かう"], type: "単語", example: "Eat breakfast. (朝ごはんを食べなさい)" },
+    { word: "drink", meaning: "<ruby>飲<rt>の</rt></ruby>む", options: ["のむ", "たべる", "あらう", "かう"], type: "単語", example: "Drink milk. (牛乳を飲みなさい)" },
+    { word: "go", meaning: "<ruby>行<rt>い</rt></ruby>く", options: ["いく", "くる", "かえる", "とまる"], type: "単語", example: "Go to bed. (寝なさい)" },
+    { word: "come", meaning: "<ruby>来<rt>く</rt></ruby>る", options: ["くる", "いく", "かえる", "はしる"], type: "単語", example: "Come here. (ここに来なさい)" },
+    { word: "play", meaning: "<ruby>遊<rt>あそ</rt></ruby>ぶ・（スポーツなどを）する", options: ["あそぶ", "べんきょうする", "はたらく", "ねる"], type: "単語", example: "Play soccer. (サッカーをしよう)" },
+    { word: "study", meaning: "<ruby>勉強<rt>べんきょう</rt></ruby>する", options: ["べんきょうする", "あそぶ", "やすむ", "かう"], type: "単語", example: "Study math. (算数を勉強しなさい)" },
+    { word: "make", meaning: "<ruby>作<rt>つく</rt></ruby>る", options: ["つくる", "こわす", "かう", "うる"], type: "単語", example: "Make a cake. (ケーキを作る)" },
+    { word: "buy", meaning: "<ruby>買<rt>か</rt></ruby>う", options: ["かう", "うる", "もらう", "あげる"], type: "単語", example: "Buy a new ball. (新しいボールを買う)" },
+
+    // イディオム（熟語）
+    { word: "look at", meaning: "〜を<ruby>見<rt>み</rt></ruby>る", options: ["〜を見る", "〜を探す", "〜を聞く", "〜を書く"], type: "イディオム", example: "Look at that picture. (あの絵を見なさい)" },
+    { word: "get up", meaning: "<ruby>起<rt>お</rt></ruby>きる", options: ["起きる", "寝る", "座る", "立つ"], type: "イディオム", example: "I get up at seven. (わたしは7時に起きます)" },
+    { word: "go to bed", meaning: "<ruby>寝<rt>ね</rt></ruby>る", options: ["寝る", "起きる", "出かける", "帰る"], type: "イディオム", example: "Go to bed early. (はやく寝なさい)" },
+    { word: "listen to", meaning: "〜を<ruby>聴<rt>き</rt></ruby>く", options: ["〜を聴く", "〜を見る", "〜を話す", "〜を買う"], type: "イディオム", example: "Listen to music. (音楽を聴く)" },
+    { word: "after school", meaning: "<ruby>放課後<rt>ほうかご</rt></ruby>", options: ["放課後", "午前中", "夜", "週末"], type: "イディオム", example: "Play tennis after school. (放課後にテニスをする)" },
+    { word: "good morning", meaning: "おはよう", options: ["おはよう", "こんにちは", "こんばんは", "さようなら"], type: "イディオム", example: "Good morning, Ms. Green! (グリーン先生、おはようございます！)" },
+    { word: "sit down", meaning: "<ruby>座<rt>すわ</rt></ruby>る", options: ["座る", "立つ", "走る", "止まる"], type: "イディオム", example: "Please sit down. (どうぞ座ってください)" },
+    { word: "stand up", meaning: "<ruby>立<rt>た</rt></ruby>ち<ruby>上<rt>あ</rt></ruby>がる", options: ["立ち上がる", "座る", "ねそべる", "あるく"], type: "イディオム", example: "Stand up, please. (立ってください)" },
+    { word: "turn on", meaning: "（電気などを）つける", options: ["つける", "けす", "ひらく", "とじる"], type: "イディオム", example: "Turn on the light. (電気をつけなさい)" },
+    { word: "turn off", meaning: "（電気などを）けす", options: ["けす", "つける", "こわす", "みがく"], type: "イディオム", example: "Turn off the TV. (テレビをけしなさい)" },
+    { word: "welcome to", meaning: "〜へようこそ", options: ["〜へようこそ", "〜さようなら", "〜ありがとう", "〜ごめんなさい"], type: "イディオム", example: "Welcome to Japan! (日本へようこそ！)" },
+    { word: "a lot of", meaning: "<ruby>真<rt>ま</rt></ruby>ことに・たくさんの", options: ["たくさんの", "少しの", "いくつかの", "まったく〜ない"], type: "イディオム", example: "I have a lot of books. (本をたくさん持っています)" },
+    { word: "of course", meaning: "もちろん", options: ["もちろん", "たぶん", "いいえ", "ざんねん"], type: "イディオム", example: "Of course! (もちろんです！)" },
+    { word: "how much", meaning: "いくら（値段）", options: ["いくら", "いくつ", "だれ", "どこ"], type: "イディオム", example: "How much is this? (これはいくらですか？)" },
+    { word: "how many", meaning: "いくつ（個数）", options: ["いくつ", "いくら", "いつ", "なぜ"], type: "イディオム", example: "How many apples? (りんごは何個ありますか？)" },
+    { word: "come in", meaning: "<ruby>入<rt>はい</rt></ruby>る", options: ["入る", "出る", "帰る", "止まる"], type: "イディオム", example: "Come in, please. (どうぞお入りください)" },
+    { word: "go home", meaning: "<ruby>家<rt>いえ</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>る", options: ["家に帰る", "学校に行く", "遊びに行く", "買いものに行く"], type: "イディオム", example: "I go home at five. (5時に家に帰ります)" },
+    { word: "wash hands", meaning: "<ruby>手<rt>て</rt></ruby>を<ruby>洗<rt>あら</rt></ruby>う", options: ["手を洗う", "顔を洗う", "歯をみがく", "髪をかす"], type: "イディオム", example: "Wash your hands. (手を洗いなさい)" },
+    { word: "have breakfast", meaning: "<ruby>朝<rt>あさ</rt></ruby>ごはんをたべる", options: ["朝ごはんを食べる", "昼ごはんを食べる", "夜ごはんを食べる", "おやつを食べる"], type: "イディオム", example: "I have breakfast at eight. (8時に朝ごはんを食べます)" },
+    { word: "have lunch", meaning: "<ruby>昼<rt>ひる</rt></ruby>ごはんをたべる", options: ["昼ごはんを食べる", "朝ごはんを食べる", "夜ごはんを食べる", "料理を作る"], type: "イディオム", example: "Let's have lunch. (昼ごはんを食べよう)" },
+    { word: "have dinner", meaning: "<ruby>夜<rt>よる</rt></ruby>ごはんをたべる", options: ["夜ごはんを食べる", "朝ごはんを食べる", "昼ごはんを食べる", "お皿を洗う"], type: "イディオム", example: "We have dinner together. (みんなで夜ごはんを食べます)" }
+  ],
+
+  4: [
+    // 単語
+    { word: "yesterday", meaning: "きのう", options: ["きのう", "きょう", "あした", "あさって"], type: "単語", example: "I was busy yesterday. (きのうは忙しかったです)" },
+    { word: "tomorrow", meaning: "あした", options: ["あした", "きのう", "きょう", "来週"], type: "単語", example: "See you tomorrow. (またあしたあおう)" },
+    { word: "season", meaning: "<ruby>季節<rt>きせつ</rt></ruby>", options: ["きせつ", "てんき", "じかん", "ねんれい"], type: "単語", example: "Which season do you like? (どの季節が好きですか？)" },
+    { word: "station", meaning: "<ruby>駅<rt>えき</rt></ruby>", options: ["えき", "バスてい", "くうこう", "こうえん"], type: "単語", example: "The station is near. (駅は近いです)" },
+    { word: "country", meaning: "<ruby>国<rt>くに</rt></ruby>", options: ["くに", "まち", "むら", "しま"], type: "単語", example: "Japan is a beautiful country. (日本は美しい国です)" },
+    { word: "city", meaning: "<ruby>都市<rt>とし</rt></ruby>・まち", options: ["まち", "くに", "いえ", "みせ"], type: "単語", example: "Tokyo is a big city. (東京は大きな都市です)" },
+    { word: "weather", meaning: "<ruby>天気<rt>てんき</rt></ruby>", options: ["てんき", "きせつ", "おんど", "かぜ"], type: "単語", example: "How is the weather? (お天気はどうですか？)" },
+    { word: "travel", meaning: "<ruby>旅行<rt>りょこう</rt></ruby>する", options: ["りょこうする", "べんきょうする", "さんぽする", "買い物する"], type: "単語", example: "I love to travel. (旅行するのが大好きです)" },
+    { word: "clean", meaning: "<ruby>掃除<rt>そうじ</rt></ruby>する・きれいな", options: ["そうじする", "よごす", "あらふ", "こわす"], type: "単語", example: "Clean your room. (部屋をそうじしなさい)" },
+    { word: "enjoy", meaning: "<ruby>楽<rt>たの</rt></ruby>しむ", options: ["たのしむ", "かなしむ", "おこる", "つかれる"], type: "単語", example: "Enjoy the party! (パーティーを楽しんでね！)" },
+    { word: "mountain", meaning: "<ruby>山<rt>やま</rt></ruby>", options: ["やま", "うみ", "かわ", "みずうみ"], type: "単語", example: "Mt. Fuji is a high mountain. (富士山は高い山です)" },
+    { word: "river", meaning: "<ruby>川<rt>かわ</rt></ruby>", options: ["かわ", "うみ", "やま", "いけ"], type: "単語", example: "Swim in the river. (川でおよぐ)" },
+    { word: "sea", meaning: "<ruby>海<rt>うみ</rt></ruby>", options: ["うみ", "かわ", "やま", "そら"], type: "単語", example: "The sea is vast. (海は広大です)" },
+    { word: "sky", meaning: "<ruby>空<rt>そら</rt></ruby>", options: ["そら", "りく", "うみ", "くも"], type: "単語", example: "Look at the blue sky. (青い空をごらん)" },
+    { word: "cloud", meaning: "<ruby>雲<rt>くも</rt></ruby>", options: ["くも", "あめ", "ゆき", "かぜ"], type: "単語", example: "There are many clouds. (雲がたくさんあります)" },
+    { word: "rain", meaning: "<ruby>雨<rt>あめ</rt></ruby>", options: ["あめ", "ゆき", "はれ", "くもり"], type: "単語", example: "It is raining now. (いま雨が降っています)" },
+    { word: "snow", meaning: "<ruby>雪<rt>ゆき</rt></ruby>", options: ["ゆき", "あめ", "かぜ", "あらし"], type: "単語", example: "Snow is white. (雪は白い)" },
+    { word: "wind", meaning: "<ruby>風<rt>かぜ</rt></ruby>", options: ["かぜ", "あめ", "ゆき", "たいよう"], type: "単語", example: "The wind is blowing. (風が吹いています)" },
+    { word: "spring", meaning: "<ruby>春<rt>はる</rt></ruby>", options: ["はる", "なつ", "あき", "ふゆ"], type: "単語", example: "Spring has come. (春が来ました)" },
+    { word: "autumn", meaning: "<ruby>秋<rt>あき</rt></ruby>", options: ["あき", "はる", "なつ", "ふゆ"], type: "単語", example: "Autumn is cool. (秋は涼しい)" },
+    { word: "winter", meaning: "<ruby>冬<rt>ふゆ</rt></ruby>", options: ["ふゆ", "はる", "なつ", "あき"], type: "単語", example: "Winter is cold. (冬は寒い)" },
+    { word: "hospital", meaning: "<ruby>病院<rt>びょういん</rt></ruby>", options: ["びょういん", "えいがかん", "としょかん", "がっこう"], type: "単語", example: "Go to the hospital. (病院に行きなさい)" },
+    { word: "library", meaning: "<ruby>図書館<rt>としょかん</rt></ruby>", options: ["としょかん", "びょういん", "えいがかん", "たいいくかん"], type: "単語", example: "Read books at the library. (図書館で本を読む)" },
+    { word: "museum", meaning: "<ruby>博物館<rt>はくぶつかん</rt></ruby>", options: ["はくぶつかん", "としょかん", "びょういん", "すいぞくかん"], type: "単語", example: "Visit the museum. (博物館を訪れる)" },
+    { word: "cinema", meaning: "<ruby>映画館<rt>えいがかん</rt></ruby>", options: ["えいがかん", "としょかん", "びょういん", "劇場"], type: "単語", example: "Go to the cinema. (映画館に行く)" },
+    { word: "store", meaning: "<ruby>店<rt>みせ</rt></ruby>", options: ["みせ", "いえ", "えき", "こうえん"], type: "単語", example: "A toy store. (おもちゃ屋さん)" },
+    { word: "restaurant", meaning: "<ruby>食堂<rt>しょくどう</rt></ruby>・レストラン", options: ["レストラン", "としょかん", "びょういん", "えき"], type: "単語", example: "Eat at a restaurant. (レストランで食べる)" },
+    { word: "airport", meaning: "<ruby>空港<rt>くうこう</rt></ruby>", options: ["くうこう", "えき", "みなと", "バスてい"], type: "単語", example: "The airplane is at the airport. (飛行機が空港にあります)" },
+    { word: "hotel", meaning: "ホテル", options: ["ホテル", "いえ", "がっこう", "みせ"], type: "単語", example: "Stay at a hotel. (ホテルに泊まる)" },
+    { word: "church", meaning: "<ruby>教会<rt>きょうかい</rt></ruby>", options: ["きょうかい", "おてら", "じんじゃ", "がっこう"], type: "単語", example: "A beautiful church. (美しい教会)" },
+    { word: "temple", meaning: "<ruby>寺<rt>てら</rt></ruby>", options: ["てら", "きょうかい", "じんじゃ", "しろ"], type: "単語", example: "Visit a temple. (お寺を訪れる)" },
+    { word: "castle", meaning: "<ruby>城<rt>しろ</rt></ruby>", options: ["しろ", "てら", "きょうかい", "いえ"], type: "単語", example: "An old castle. (古いお城)" },
+    { word: "bridge", meaning: "<ruby>橋<rt>はし</rt></ruby>", options: ["はし", "みち", "トンネル", "えき"], type: "単語", example: "Cross the bridge. (橋を渡る)" },
+    { word: "road", meaning: "<ruby>道路<rt>どうろ</rt></ruby>・みち", options: ["みち", "はし", "かわ", "やま"], type: "単語", example: "Walk on the road. (道を歩く)" },
+    { word: "busy", meaning: "<ruby>忙<rt>いそが</rt></ruby>しい", options: ["いそがしい", "ひまな", "たのしい", "かなしい"], type: "単語", example: "I am busy today. (今日は忙しいです)" },
+    { word: "famous", meaning: "<ruby>有名<rt>ゆうめい</rt></ruby>な", options: ["ゆうめいな", "無名な", "親切な", "こわい"], type: "単語", example: "A famous singer. (有名な歌手)" },
+    { word: "kind", meaning: "<ruby>親切<rt>しんせつ</rt></ruby>な", options: ["しんせつな", "いじわるな", "おもしろい", "静かな"], type: "単語", example: "She is very kind. (彼女はとても親切です)" },
+    { word: "quiet", meaning: "<ruby>静<rt>しず</rt></ruby>かな", options: ["しずかな", "うるさい", "にぎやかな", "たのしい"], type: "単語", example: "Be quiet in the library. (図書館では静かにしなさい)" },
+    { word: "noisy", meaning: "やかましい・うるさい", options: ["うるさい", "しずかな", "くらい", "あかるい"], type: "単語", example: "It is noisy outside. (外がうるさいです)" },
+    { word: "bright", meaning: "<ruby>明るい<rt>あかるい</rt></ruby>", options: ["あかるい", "くらい", "ひろい", "せまい"], type: "単語", example: "A bright room. (明るい部屋)" },
+    { word: "dark", meaning: "<ruby>暗い<rt>くらい</rt></ruby>", options: ["くらい", "あかるい", "たかい", "ひくい"], type: "単語", example: "It gets dark at six. (6時に暗くなります)" },
+    { word: "heavy", meaning: "<ruby>重い<rt>おもい</rt></ruby>", options: ["おもい", "かるい", "かたい", "やわらかい"], type: "単語", example: "This box is heavy. (この箱は重いです)" },
+    { word: "light", meaning: "<ruby>軽い<rt>かるい</rt></ruby>・ひかり", options: ["かるい", "おもい", "あつい", "つめたい"], type: "単語", example: "Feathers are light. (羽は軽いです)" },
+
+    // イディオム
+    { word: "take a bath", meaning: "<ruby>入浴<rt>にゅうよく</rt></ruby>する（お風呂に入る）", options: ["お風呂に入る", "シャワーをあびる", "顔をあらう", "服をきる"], type: "イディオム", example: "I take a bath every day. (毎日お風呂に入ります)" },
+    { word: "take a picture", meaning: "<ruby>写真<rt>しゃしん</rt></ruby>をとる", options: ["写真を撮る", "絵を描く", "本を買う", "電話をかける"], type: "イディオム", example: "Take a picture here. (ここで写真を撮ろう)" },
+    { word: "look for", meaning: "〜を<ruby>探<rt>さが</rt></ruby>す", options: ["〜を探す", "〜を見る", "〜を聞く", "〜を捨てる"], type: "イディオム", example: "I am looking for my key. (鍵を探しています)" },
+    { word: "say hello to", meaning: "〜によろしくと<ruby>伝<rt>つた</rt></ruby>える", options: ["〜によろしく伝える", "〜にお礼を言う", "〜に謝る", "〜を招待する"], type: "イディオム", example: "Say hello to your mother. (お母さんによろしくね)" },
+    { word: "be good at", meaning: "〜が得意だ", options: ["〜が得意だ", "〜が苦手だ", "〜が好きだ", "〜が嫌いだ"], type: "イディオム", example: "He is good at math. (彼は算数が得意です)" },
+    { word: "be bad at", meaning: "〜が<ruby>苦手<rt>にがて</rt></ruby>だ", options: ["〜が苦手だ", "〜が得意だ", "〜が好きだ", "〜が得意になりたい"], type: "イディオム", example: "I am bad at singing. (歌うのが苦手です)" },
+    { word: "by the way", meaning: "ところで", options: ["ところで", "しかし", "だから", "たとえば"], type: "イディオム", example: "By the way, what time is it? (ところで、いま何時ですか？)" },
+    { word: "for example", meaning: "<ruby>例<rt>たと</rt></ruby>えば", options: ["例えば", "つまり", "最後に", "最初に"], type: "イディオム", example: "I like fruits, for example, apples. (フルーツ、例えばリンゴが好きです)" },
+    { word: "all over the world", meaning: "<ruby>世界中<rt>せかいじゅう</rt></ruby>で", options: ["世界中で", "日本中で", "町中で", "家の中で"], type: "イディオム", example: "Soccer is played all over the world. (サッカーは世界中で遊ばれています)" },
+    { word: "in front of", meaning: "〜の<ruby>前<rt>まえ</rt></ruby>で", options: ["〜の前で", "〜の後ろで", "〜の隣で", "〜の中で"], type: "イディオム", example: "Stand in front of the door. (ドアの前に立ちなさい)" },
+    { word: "next to", meaning: "〜の<ruby>隣<rt>となり</rt></ruby>に", options: ["〜の隣に", "〜の前で", "〜の後ろで", "〜の上に"], type: "イディオム", example: "He sat next to me. (彼はわたしの隣に座った)" },
+    { word: "far from", meaning: "〜から<ruby>遠<rt>とお</rt></ruby>い", options: ["〜から遠い", "〜から近い", "〜の向かいの", "〜の近くの"], type: "イディオム", example: "My house is far from the station. (家は駅から遠いです)" },
+    { word: "a few", meaning: "いくつかの（少しの）", options: ["いくつかの", "たくさんの", "全くない", "すべての"], type: "イディオム", example: "I have a few friends. (友達が少しいます)" },
+    { word: "a pair of", meaning: "一組の（２つで１つの）", options: ["一組の", "３つの", "たくさんの", "半分"], type: "イディオム", example: "A pair of shoes. (一足の靴)" },
+    { word: "take off", meaning: "（服などを）脱ぐ・離陸する", options: ["脱ぐ", "着る", "洗う", "畳む"], type: "イディオム", example: "Take off your shoes. (靴を脱ぎなさい)" },
+    { word: "put on", meaning: "（服などを）着る・身につける", options: ["着る", "脱ぐ", "買ってくる", "捨てる"], type: "イディオム", example: "Put on your coat. (コートを着なさい)" },
+    { word: "get on", meaning: "（電車などに）乗る", options: ["乗る", "降りる", "歩く", "走る"], type: "イディオム", example: "Get on the train. (電車に乗りなさい)" },
+    { word: "get off", meaning: "（電車などを）降りる", options: ["降りる", "乗る", "乗り換える", "見送る"], type: "イディオム", example: "Get off at the next station. (次の駅で降りなさい)" },
+    { word: "shake hands", meaning: "<ruby>握手<rt>あくしゅ</rt></ruby>する", options: ["握手する", "手を振る", "拍手する", "おじぎする"], type: "イディオム", example: "Let's shake hands. (握手しましょう)" },
+    { word: "write back", meaning: "<ruby>返信<rt>へんしん</rt></ruby>する・お返事をかく", options: ["返事を書く", "手紙を読む", "電話する", "メールを消す"], type: "イディオム", example: "Please write back soon. (すぐにお返事をください)" },
+    { word: "over there", meaning: "あそこに", options: ["あそこに", "ここに", "どこかに", "向こう側に"], type: "イディオム", example: "Look over there. (あそこをごらん)" },
+    { word: "wait for", meaning: "〜を<ruby>待<rt>ま</rt></ruby>つ", options: ["〜を待つ", "〜を探す", "〜を呼ぶ", "〜を見送る"], type: "イディオム", example: "Wait for me! (わたしを待って！)" },
+    { word: "be interested in", meaning: "〜に<ruby>興味<rt>きょうみ</rt></ruby>がある", options: ["〜に興味がある", "〜が怖い", "〜が得意だ", "〜に飽きている"], type: "イディオム", example: "I am interested in history. (歴史に興味があります)" },
+    { word: "ask for", meaning: "〜を<ruby>求<rt>もと</rt></ruby>める・頼む", options: ["〜を求める", "〜を与える", "〜を断る", "〜を探す"], type: "イディオム", example: "Ask for help. (助けを求めなさい)" }
+  ],
+
+  3: [
+    // 単語
+    { word: "environment", meaning: "<ruby>環境<rt>かんきょう</rt></ruby>", options: ["かんきょう", "しゃかい", "けいざい", "ぶんか"], type: "単語", example: "Protect the environment. (環境を守ろう)" },
+    { word: "foreign", meaning: "<ruby>外国<rt>がいこく</rt></ruby>の", options: ["がいこくの", "こくないの", "ちほうの", "ちかい"], type: "単語", example: "Learn a foreign language. (外国語を学ぶ)" },
+    { word: "volunteer", meaning: "ボランティア", options: ["ボランティア", "プロ", "リーダー", "メンバー"], type: "単語", example: "Join a volunteer group. (ボランティア活動に参加する)" },
+    { word: "future", meaning: "<ruby>未来<rt>みらい</rt></ruby>・しょうらい", options: ["みらい", "かこ", "げんざい", "むかし"], type: "単語", example: "In the future. (未来に・将来)" },
+    { word: "invent", meaning: "<ruby>発明<rt>はつめい</rt></ruby>する", options: ["はつめいする", "はっけんする", "こわす", "まねする"], type: "単語", example: "Edison invented the light bulb. (エジソンは電球を発明した)" },
+    { word: "discover", meaning: "<ruby>発見<rt>はっけん</rt></ruby>する", options: ["はっけんする", "はつめいする", "かくす", "うしなう"], type: "単語", example: "Discover new island. (新しい島を発見する)" },
+    { word: "culture", meaning: "<ruby>文化<rt>ぶんか</rt></ruby>", options: ["ぶんか", "れきし", "かがく", "げいじゅつ"], type: "単語", example: "Japanese culture. (日本の文化)" },
+    { word: "history", meaning: "<ruby>歴史<rt>れきし</rt></ruby>", options: ["れきし", "地理", "科学", "数学"], type: "単語", example: "Study world history. (世界史を勉強する)" },
+    { word: "science", meaning: "<ruby>科学<rt>かがく</rt></ruby>", options: ["かがく", "れきし", "ぶんか", "えいご"], type: "単語", example: "Science experiment. (科学の実験)" },
+    { word: "technology", meaning: "<ruby>技術<rt>ぎじゅつ</rt></ruby>", options: ["ぎじゅつ", "じゅぎょう", "けんきゅう", "じっけん"], type: "単語", example: "Modern technology. (現代の技術)" },
+    { word: "society", meaning: "<ruby>社会<rt>しゃかい</rt></ruby>", options: ["しゃかい", "かんきょう", "せかい", "くに"], type: "単語", example: "Our society. (私たちの社会)" },
+    { word: "government", meaning: "<ruby>政府<rt>せいふ</rt></ruby>", options: ["せいふ", "かいしゃ", "がっこう", "くあや"], type: "単語", example: "The Japanese government. (日本政府)" },
+    { word: "education", meaning: "<ruby>教育<rt>きょういく</rt></ruby>", options: ["きょういく", "しつけ", "べんきょう", "くんれん"], type: "単語", example: "School education. (学校教育)" },
+    { word: "opinion", meaning: "<ruby>意見<rt>いけん</rt></ruby>", options: ["いけん", "うわさ", "はなし", "質問"], type: "単語", example: "In my opinion. (私の意見では)" },
+    { word: "reason", meaning: "<ruby>理由<rt>りゆう</rt></ruby>", options: ["りゆう", "けっか", "目的", "原因"], type: "単語", example: "Tell me the reason. (理由を教えてください)" },
+    { word: "result", meaning: "<ruby>結果<rt>けっか</rt></ruby>", options: ["けっか", "りゆう", "途中", "始まり"], type: "単語", example: "Test result. (テストの結果)" },
+    { word: "purpose", meaning: "<ruby>目的<rt>もくてき</rt></ruby>", options: ["もくてき", "りゆう", "けっか", "方法"], type: "単語", example: "The purpose of this trip. (この旅行の目的)" },
+    { word: "method", meaning: "<ruby>方法<rt>ほうほう</rt></ruby>", options: ["ほうほう", "もくてき", "どうぐ", "材料"], type: "単語", example: "A good method. (良い方法)" },
+    { word: "habit", meaning: "<ruby>習慣<rt>しゅうかん</rt></ruby>・くせ", options: ["しゅうかん", "趣味", "仕事", "性格"], type: "単語", example: "Good habits. (良い習慣)" },
+    { word: "custom", meaning: "<ruby>慣習<rt>かんしゅう</rt></ruby>・しきたり", options: ["かんしゅう", "ルール", "ほうりつ", "歴史"], type: "単語", example: "Local custom. (地元の慣習)" },
+    { word: "chance", meaning: "<ruby>機会<rt>きかい</rt></ruby>・チャンス", options: ["きかい", "こううん", "運", "時間"], type: "単語", example: "A good chance. (良い機会)" },
+    { word: "danger", meaning: "<ruby>危険<rt>きけん</rt></ruby>", options: ["きけん", "あんぜん", "事故", "事件"], type: "単語", example: "In danger. (危険な状態で)" },
+    { word: "safety", meaning: "<ruby>安全<rt>あんぜん</rt></ruby>", options: ["あんぜん", "きけん", "安心", "平和"], type: "単語", example: "For your safety. (あなたの安全のために)" },
+    { word: "health", meaning: "<ruby>健康<rt>けんこう</rt></ruby>", options: ["けんこう", "びょうき", "体調", "運動"], type: "単語", example: "Health is important. (健康は大切です)" },
+    { word: "disease", meaning: "<ruby>病気<rt>びょうき</rt></ruby>", options: ["びょうき", "けが", "けんこう", "薬"], type: "単語", example: "Prevent disease. (病気を予防する)" },
+    { word: "medicine", meaning: "<ruby>薬<rt>くすり</rt></ruby>・医学", options: ["くすり", "びょういん", "いしゃ", "ちりょう"], type: "単語", example: "Take medicine. (薬を飲む)" },
+    { word: "patient", meaning: "<ruby>患者<rt>かんじゃ</rt></ruby>・忍耐強い", options: ["かんじゃ", "いしゃ", "かんごし", "客"], type: "単語", example: "The doctor examines patients. (医師が患者を診察する)" },
+    { word: "symptom", meaning: "<ruby>症状<rt>しょうじょう</rt></ruby>", options: ["しょうじょう", "びょうき", "原因", "結果"], type: "単語", example: "Flu symptoms. (インフルエンザの症状)" },
+    { word: "accident", meaning: "<ruby>事故<rt>じこ</rt></ruby>", options: ["じこ", "事件", "災害", "火事"], type: "単語", example: "Traffic accident. (交通事故)" },
+    { word: "traffic", meaning: "<ruby>交通<rt>こうつう</rt></ruby>", options: ["こうつう", "道路", "乗り物", "信号"], type: "単語", example: "Heavy traffic. (激しい交通量)" },
+    { word: "signal", meaning: "<ruby>信号<rt>しんごう</rt></ruby>", options: ["しんごう", "看板", "道路", "標識"], type: "単語", example: "Red signal. (赤信号)" },
+    { word: "passenger", meaning: "<ruby>乗客<rt>じょうきゃく</rt></ruby>", options: ["じょうきゃく", "うんてんしゅ", "歩行者", "ガイド"], type: "単語", example: "Train passengers. (電車の乗客)" },
+    { word: "pedestrian", meaning: "<ruby>歩行者<rt>ほこうしゃ</rt></ruby>", options: ["ほこうしゃ", "じょうきゃく", "うんてんしゅ", "警察"], type: "単語", example: "Pedestrian crossing. (横断歩道)" },
+    { word: "vehicle", meaning: "<ruby>乗り物<rt>のりもの</rt></ruby>", options: ["のりもの", "建物", "道具", "機械"], type: "単語", example: "Electric vehicle. (電気自動車)" },
+    { word: "experience", meaning: "<ruby>経験<rt>けいけん</rt></ruby>", options: ["けいけん", "知識", "技術", "練習"], type: "単語", example: "A valuable experience. (貴重な経験)" },
+    { word: "knowledge", meaning: "<ruby>知識<rt>ちしき</rt></ruby>", options: ["ちしき", "けいけん", "記憶", "考え"], type: "単語", example: "Gain knowledge. (知識を得る)" },
+    { word: "memory", meaning: "<ruby>記憶<rt>きおく</rt></ruby>・思い出", options: ["きおく", "ちしき", "夢", "考え"], type: "単語", example: "Sweet memories. (楽しい思い出)" },
+    { word: "imagination", meaning: "<ruby>想像力<rt>そうぞうりょく</rt></ruby>", options: ["そうぞうりょく", "記憶力", "集中力", "思考力"], type: "単語", example: "Use your imagination. (想像力を働かせなさい)" },
+    { word: "creativity", meaning: "<ruby>創造性<rt>そうぞうせい</rt></ruby>", options: ["そうぞうせい", "技術", "能力", "経験"], type: "単語", example: "Artistic creativity. (芸術的な創造性)" },
+    { word: "ability", meaning: "<ruby>能力<rt>のうりょく</rt></ruby>", options: ["のうりょく", "技術", "知識", "経験"], type: "単語", example: "Athletic ability. (運動能力)" },
+    { word: "effort", meaning: "<ruby>努力<rt>どりょく</rt></ruby>", options: ["どりょく", "成功", "失敗", "挑戦"], type: "単語", example: "Make an effort. (努力する)" },
+    { word: "success", meaning: "<ruby>成功<rt>せいこう</rt></ruby>", options: ["せいこう", "しっぱい", "努力", "勝利"], type: "単語", example: "Wish you success. (成功を祈ります)" },
+
+    // イディオム
+    { word: "look forward to", meaning: "〜を<ruby>楽しみに待つ<rt>たのしみにまつ</rt></ruby>", options: ["〜を楽しみに待つ", "〜を思い出す", "〜を諦める", "〜を探す"], type: "イディオム", example: "I am looking forward to seeing you. (あなたに会えるのを楽しみにしています)" },
+    { word: "take care of", meaning: "〜の<ruby>世話をする<rt>せわをする</rt></ruby>", options: ["〜の世話をする", "〜に注意する", "〜を観察する", "〜を捨てる"], type: "イディオム", example: "Take care of your dog. (犬の世話をしなさい)" },
+    { word: "give up", meaning: "<ruby>諦める<rt>あきらめる</rt></ruby>", options: ["諦める", "続ける", "始める", "やり直す"], type: "イディオム", example: "Don't give up! (諦めないで！)" },
+    { word: "run out of", meaning: "〜を<ruby>使い果たす<rt>つかいはたす</rt></ruby>", options: ["〜を使い果たす", "〜を見つける", "〜を捨てる", "〜をためる"], type: "イディオム", example: "We ran out of water. (水を使い果たしてしまった)" },
+    { word: "catch up with", meaning: "〜に<ruby>追いつく<rt>おいつく</rt></ruby>", options: ["〜に追いつく", "〜を追いこす", "〜から逃げる", "〜を待つ"], type: "イディオム", example: "Run fast to catch up with him. (彼に追いつくために速く走りなさい)" },
+    { word: "keep in touch", meaning: "<ruby>連絡を取り合う<rt>れんらくをとりあう</rt></ruby>", options: ["連絡を取り合う", "約束を守る", "秘密にする", "ケンカする"], type: "イディオム", example: "Let's keep in touch. (これからも連絡を取り合おうね)" },
+    { word: "make up one's mind", meaning: "<ruby>決心する<rt>けっしんする</rt></ruby>", options: ["決心する", "悩む", "諦める", "変更する"], type: "イディオム", example: "He made up his mind. (彼は決心した)" },
+    { word: "take part in", meaning: "〜に<ruby>参加する<rt>さんかする</rt></ruby>", options: ["〜に参加する", "〜を見学する", "〜を欠席する", "〜を応援する"], type: "イディオム", example: "Take part in the race. (レースに参加する)" },
+    { word: "as soon as possible", meaning: "できるだけ<ruby>早く<rt>はやく</rt></ruby>", options: ["できるだけ早く", "ゆっくりと", "後で", "準備ができたら"], type: "イディオム", example: "Come here as soon as possible. (できるだけ早くここに来てください)" },
+    { word: "in order to", meaning: "〜するために", options: ["〜するために", "〜した結果", "〜にかかわらず", "〜の代わりに"], type: "イディオム", example: "Study hard in order to pass. (合格するために一生懸命勉強する)" },
+    { word: "so that", meaning: "〜するために", options: ["〜するために", "〜なので", "〜だけれども", "〜のように"], type: "イディオム", example: "Speak loudly so that everyone can hear. (みんなに聞こえるように大きな声で話しなさい)" },
+    { word: "because of", meaning: "〜のために（理由）", options: ["〜のために", "〜にもかかわらず", "〜の代わりに", "〜のせいでなく"], type: "イディオム", example: "Late because of heavy rain. (大雨のために遅刻した)" },
+    { word: "instead of", meaning: "〜の<ruby>代わりに<rt>かわりに</rt></ruby>", options: ["〜の代わりに", "〜と一緒に", "〜の前に", "〜の後に"], type: "イディオム", example: "Use water instead of milk. (牛乳の代わりに水を使う)" },
+    { word: "according to", meaning: "〜に<ruby>よると<rt>よると</rt></ruby>", options: ["〜によると", "〜に反対して", "〜に従わずに", "〜を問わず"], type: "イディオム", example: "According to the weather report. (天気予報によると)" },
+    { word: "by accident", meaning: "<ruby>偶然に<rt>ぐうぜんに</rt></ruby>", options: ["偶然に", "故意に", "わざと", "必然的に"], type: "イディオム", example: "Met her by accident. (彼女に偶然出会った)" },
+    { word: "on purpose", meaning: "<ruby>わざと<rt>わざと</rt></ruby>・故意に", options: ["わざと", "偶然に", "間違えて", "うっかり"], type: "イディオム", example: "He broke it on purpose. (彼はそれをわざと壊した)" },
+    { word: "in fact", meaning: "<ruby>実際に<rt>じっさいに</rt></ruby>・実は", options: ["実際に", "反対に", "例として", "結論として"], type: "イディオム", example: "In fact, it is true. (実際に、それは本当です)" },
+    { word: "as a result", meaning: "<ruby>結果として<rt>けっかとして</rt></ruby>", options: ["結果として", "原因として", "代わりに", "最初に"], type: "イディオム", example: "As a result, he won. (結果として、彼は勝った)" },
+    { word: "at first", meaning: "<ruby>最初は<rt>さいしょは</rt></ruby>", options: ["最初は", "最後は", "ついに", "突然"], type: "イディオム", example: "At first, it was difficult. (最初は難しかった)" },
+    { word: "at last", meaning: "<ruby>ついに<rt>ついに</rt></ruby>・最後に", options: ["ついに", "最初は", "途中で", "たまに"], type: "イディオム", example: "At last, we arrived. (ついに到着した)" },
+    { word: "little by little", meaning: "<ruby>少しずつ<rt>すこしずつ</rt></ruby>", options: ["少しずつ", "一気に", "突然", "徐々にでなく"], type: "イディオム", example: "Improve little by little. (少しずつ上達する)" },
+    { word: "step by step", meaning: "<ruby>一歩ずつ<rt>いっぽずつ</rt></ruby>", options: ["一歩ずつ", "急速に", "飛ばして", "ランダムに"], type: "イディオム", example: "Learn step by step. (一歩ずつ学ぶ)" },
+    { word: "all of a sudden", meaning: "<ruby>突然に<rt>とつぜんに</rt></ruby>", options: ["突然に", "ゆっくりと", "予定通り", "静かに"], type: "イディオム", example: "All of a sudden, it started to rain. (突然、雨が降り出した)" },
+    { word: "make a mistake", meaning: "<ruby>間違える<rt>まちがえる</rt></ruby>", options: ["間違える", "成功する", "直す", "見つける"], type: "イディオム", example: "Don't be afraid to make a mistake. (間違えるのを恐れないで)" }
+  ]
+};
+
+// --- ゲーム状態変数 ---
+let currentGrade = 5;
+let currentQuestionIndex = 0;
+let score = 0;
+let currentQuestions = [];
+let learnedWords = JSON.parse(localStorage.getItem('eigo_learned_words') || '{}');
+
+// サウンドエフェクト (Web Audio API)
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'correct') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.4);
+  } else if (type === 'wrong') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+    osc.frequency.setValueAtTime(196, audioCtx.currentTime + 0.15); // G3
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+}
+
+// 画面切り替え
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  document.getElementById('homeBtn').style.display = (screenId === 'homeScreen') ? 'none' : 'block';
+}
+
+// シャッフル（フィッシャー–イェーツ）
+function shuffleArray(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ゲーム開始
+function startGame(grade) {
+  currentGrade = grade;
+  currentQuestionIndex = 0;
+  score = 0;
+  
+  // 選択した級の全問題からランダムに10問選出（重複なし）
+  const allGradeQuestions = QUESTION_DATABASE[grade];
+  const shuffled = shuffleArray(allGradeQuestions);
+  currentQuestions = shuffled.slice(0, 10);
+
+  document.getElementById('gradeBadge').textContent = `英検 ${grade}級`;
+  showScreen('gameScreen');
+  renderQuestion();
+}
+
+// クイズ描画
+function renderQuestion() {
+  const q = currentQuestions[currentQuestionIndex];
+  
+  document.getElementById('progressText').textContent = `第 ${currentQuestionIndex + 1} / ${currentQuestions.length} 問`;
+  document.getElementById('scoreText').textContent = `スコア: ${score}`;
+  document.getElementById('typeTag').textContent = q.type;
+  document.getElementById('questionWord').textContent = q.word;
+
+  // 解説カード＆つぎへボタンの初期化
+  document.getElementById('explainCard').classList.remove('active');
+  document.getElementById('nextBtn').classList.remove('active');
+
+  // 選択肢作成 (正解1つ + 不正解3つ)
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+
+  // 不正解のダミーデータを作成
+  let dummyOptions = [];
+  const allItems = QUESTION_DATABASE[currentGrade];
+  
+  while (dummyOptions.length < 3) {
+    const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
+    // ルビのタグを除去して純粋なテキストを比較・表示
+    const cleanMeaning = randomItem.options[0];
+    if (cleanMeaning !== q.options[0] && !dummyOptions.includes(cleanMeaning)) {
+      dummyOptions.push(cleanMeaning);
+    }
+  }
+
+  // 4つの選択肢をシャッフル
+  const choices = shuffleArray([q.options[0], ...dummyOptions]);
+
+  choices.forEach(choiceText => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = choiceText;
+    btn.onclick = () => checkAnswer(choiceText, q.options[0], btn);
+    container.appendChild(btn);
+  });
+}
+
+// 回答チェック
+function checkAnswer(selected, correct, clickedBtn) {
+  const q = currentQuestions[currentQuestionIndex];
+  const buttons = document.querySelectorAll('.opt-btn');
+  
+  // 全ボタン無効化
+  buttons.forEach(b => b.onclick = null);
+
+  const isCorrect = (selected === correct);
+
+  if (isCorrect) {
+    playSound('correct');
+    clickedBtn.classList.add('correct');
+    score += 10;
+    
+    // 単語を学習済み（⭐）としてローカルストレージに保存
+    learnedWords[q.word] = true;
+    localStorage.setItem('eigo_learned_words', JSON.stringify(learnedWords));
+
+    document.getElementById('explainTitle').textContent = '⭕ せいかい！';
+    document.getElementById('explainTitle').style.color = '#2ECC71';
+  } else {
+    playSound('wrong');
+    clickedBtn.classList.add('wrong');
+    
+    // 正解のボタンを緑色にする
+    buttons.forEach(b => {
+      if (b.textContent === correct) b.classList.add('correct');
+    });
+
+    document.getElementById('explainTitle').textContent = '❌ おしい！';
+    document.getElementById('explainTitle').style.color = '#E74C3C';
+  }
+
+  // 解説を表示
+  document.getElementById('explainMeaning').innerHTML = `<strong>意味:</strong> ${q.meaning}`;
+  document.getElementById('explainExample').textContent = q.example;
+  document.getElementById('explainCard').classList.add('active');
+
+  // 「つぎの問題へ」ボタンを表示
+  document.getElementById('nextBtn').classList.add('active');
+}
+
+// 次の問題へ
+function nextQuestion() {
+  currentQuestionIndex++;
+  if (currentQuestionIndex < currentQuestions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+// クリア画面表示
+function showResult() {
+  showScreen('resultScreen');
+  const total = currentQuestions.length;
+  const correctCount = score / 10;
+  
+  document.getElementById('resultScore').textContent = `${total}問ちゅう ${correctCount}問 せいかい！`;
+
+  let rank = 'C';
+  let comment = 'つぎは もっと たかいスコアを めざそう！';
+
+  if (correctCount === total) {
+    rank = 'S';
+    comment = 'すばらしい！パーフェクトクリアです！';
+  } else if (correctCount >= total * 0.8) {
+    rank = 'A';
+    comment = 'すごい！あとすこしで パーフェクト！';
+  } else if (correctCount >= total * 0.6) {
+    rank = 'B';
+    comment = 'よくがんばったね！なんども チャレンジしよう！';
+  }
+
+  document.getElementById('resultRank').textContent = rank;
+  document.getElementById('resultComment').textContent = comment;
+}
+
+// 単語図鑑表示
+function openDictionary() {
+  showScreen('dictScreen');
+  filterDict(5, document.querySelectorAll('.dict-tab')[0]);
+}
+
+function filterDict(grade, tabElem) {
+  document.querySelectorAll('.dict-tab').forEach(t => t.classList.remove('active'));
+  if (tabElem) tabElem.classList.add('active');
+
+  const listContainer = document.getElementById('dictList');
+  listContainer.innerHTML = '';
+
+  const questions = QUESTION_DATABASE[grade];
+  questions.forEach(q => {
+    const isLearned = learnedWords[q.word] || false;
+    const item = document.createElement('div');
+    item.className = 'dict-item';
+    item.innerHTML = `
+      <div>
+        <div class="dict-en">${q.word} <span style="font-size:0.75rem; color:#888;">(${q.type})</span></div>
+        <div class="dict-jp">${q.meaning}</div>
+      </div>
+      <div class="dict-star ${isLearned ? 'learned' : ''}">${isLearned ? '★ マスター' : '☆'}</div>
+    `;
+    listContainer.appendChild(item);
+  });
+}
+</script>
+
+</body>
+</html>
