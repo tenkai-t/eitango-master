@@ -280,10 +280,15 @@
       transform: scale(0.94);
     }
 
+    #gameScreen {
+      gap: 10px;
+    }
+
     .options-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
+      align-items: stretch;
     }
 
     @media (max-width: 480px) {
@@ -295,18 +300,21 @@
     .opt-btn {
       background: white;
       border: 2px solid #CBD5E0;
-      padding: 14px;
+      padding: 8px 12px;
       border-radius: 12px;
       font-size: 1rem;
       font-weight: bold;
       color: var(--dark);
       cursor: pointer;
       transition: all 0.15s ease;
-      min-height: 60px;
+      min-height: 62px;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
+      /* ふりがなのある選択肢とない選択肢で文字の位置がずれないよう、
+         全ボタン共通の行の高さ（ふりがな分の余白込み）にする */
+      line-height: 2;
     }
 
     .opt-btn:hover {
@@ -335,6 +343,8 @@
       padding: 16px;
       font-size: 0.95rem;
       line-height: 1.6;
+      /* 固定表示の「つぎへ」ボタンに末尾が隠れないようにする */
+      scroll-margin-bottom: 84px;
     }
 
     .explain-card.active {
@@ -368,6 +378,15 @@
 
     .next-btn.active {
       display: block;
+      /* 回答後は画面下部に固定表示し、スクロールしなくても押せるようにする */
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      width: calc(100% - 32px);
+      max-width: 610px;
+      z-index: 30;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
     }
 
     /* クリア・結果画面 */
@@ -448,6 +467,7 @@
     .dict-jp {
       font-size: 0.85rem;
       color: #4A5568;
+      line-height: 2;
     }
 
     .dict-star {
@@ -458,8 +478,15 @@
       color: #F6AD55;
     }
 
+    ruby {
+      ruby-align: center;
+      ruby-position: over;
+    }
+
     ruby rt {
-      font-size: 0.6em;
+      font-size: 0.58em;
+      line-height: 1;
+      letter-spacing: 0;
       color: #718096;
     }
   </style>
@@ -617,13 +644,13 @@ const QUESTION_DATABASE = {
     { word: "good morning", meaning: "おはよう", options: ["おはよう", "こんにちは", "こんばんは", "さようなら"], type: "イディオム", example: "Good morning, Ms. Green! (グリーン先生、おはようございます！)" },
     { word: "sit down", meaning: "<ruby>座<rt>すわ</rt></ruby>る", options: ["座る", "立つ", "走る", "止まる"], type: "イディオム", example: "Please sit down. (どうぞ座ってください)" },
     { word: "stand up", meaning: "<ruby>立<rt>た</rt></ruby>ち<ruby>上<rt>あ</rt></ruby>がる", options: ["立ち上がる", "座る", "ねそべる", "あるく"], type: "イディオム", example: "Stand up, please. (立ってください)" },
-    { word: "turn on", meaning: "（電気などを）つける", options: ["つける", "けす", "ひらく", "とじる"], type: "イディオム", example: "Turn on the light. (電気をつけなさい)" },
-    { word: "turn off", meaning: "（電気などを）けす", options: ["けす", "つける", "こわす", "みがく"], type: "イディオム", example: "Turn off the TV. (テレビをけしなさい)" },
+    { word: "turn on", meaning: "（<ruby>電気<rt>でんき</rt></ruby>などを）つける", options: ["つける", "けす", "ひらく", "とじる"], type: "イディオム", example: "Turn on the light. (電気をつけなさい)" },
+    { word: "turn off", meaning: "（<ruby>電気<rt>でんき</rt></ruby>などを）けす", options: ["けす", "つける", "こわす", "みがく"], type: "イディオム", example: "Turn off the TV. (テレビをけしなさい)" },
     { word: "welcome to", meaning: "〜へようこそ", options: ["〜へようこそ", "〜さようなら", "〜ありがとう", "〜ごめんなさい"], type: "イディオム", example: "Welcome to Japan! (日本へようこそ！)" },
-    { word: "a lot of", meaning: "<ruby>真<rt>ま</rt></ruby>ことに・たくさんの", options: ["たくさんの", "少しの", "いくつかの", "まったく〜ない"], type: "イディオム", example: "I have a lot of books. (本をたくさん持っています)" },
+    { word: "a lot of", meaning: "たくさんの", options: ["たくさんの", "少しの", "いくつかの", "まったく〜ない"], type: "イディオム", example: "I have a lot of books. (本をたくさん持っています)" },
     { word: "of course", meaning: "もちろん", options: ["もちろん", "たぶん", "いいえ", "ざんねん"], type: "イディオム", example: "Of course! (もちろんです！)" },
-    { word: "how much", meaning: "いくら（値段）", options: ["いくら", "いくつ", "だれ", "どこ"], type: "イディオム", example: "How much is this? (これはいくらですか？)" },
-    { word: "how many", meaning: "いくつ（個数）", options: ["いくつ", "いくら", "いつ", "なぜ"], type: "イディオム", example: "How many apples? (りんごは何個ありますか？)" },
+    { word: "how much", meaning: "いくら（<ruby>値段<rt>ねだん</rt></ruby>）", options: ["いくら", "いくつ", "だれ", "どこ"], type: "イディオム", example: "How much is this? (これはいくらですか？)" },
+    { word: "how many", meaning: "いくつ（<ruby>個数<rt>こすう</rt></ruby>）", options: ["いくつ", "いくら", "いつ", "なぜ"], type: "イディオム", example: "How many apples? (りんごは何個ありますか？)" },
     { word: "come in", meaning: "<ruby>入<rt>はい</rt></ruby>る", options: ["入る", "出る", "帰る", "止まる"], type: "イディオム", example: "Come in, please. (どうぞお入りください)" },
     { word: "go home", meaning: "<ruby>家<rt>いえ</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>る", options: ["家に帰る", "学校に行く", "遊びに行く", "買いものに行く"], type: "イディオム", example: "I go home at five. (5時に家に帰ります)" },
     { word: "wash hands", meaning: "<ruby>手<rt>て</rt></ruby>を<ruby>洗<rt>あら</rt></ruby>う", options: ["手を洗う", "顔を洗う", "歯をみがく", "髪をかす"], type: "イディオム", example: "Wash your hands. (手を洗いなさい)" },
@@ -656,9 +683,9 @@ const QUESTION_DATABASE = {
     { word: "every day", meaning: "<ruby>毎日<rt>まいにち</rt></ruby>", options: ["まいにち", "まいしゅう", "まいつき", "きょう"], type: "イディオム", example: "I read every day. (毎日読みます)" },
     { word: "next week", meaning: "<ruby>来週<rt>らいしゅう</rt></ruby>", options: ["らいしゅう", "せんしゅう", "こんしゅう", "らいげつ"], type: "イディオム", example: "See you next week. (来週会いましょう)" },
     { word: "last week", meaning: "<ruby>先週<rt>せんしゅう</rt></ruby>", options: ["せんしゅう", "らいしゅう", "こんしゅう", "せんげつ"], type: "イディオム", example: "I went to Tokyo last week. (先週東京に行きました)" },
-    { word: "in the morning", meaning: "<ruby>午前中<rt>ごぜんちゅう</rt></ruby>・朝に", options: ["ごぜんちゅう", "ごご", "よる", "ばん"], type: "イディオム", example: "I study in the morning. (午前中に勉強します)" },
-    { word: "at home", meaning: "<ruby>家<rt>いえ</rt></ruby>で・家に", options: ["いえで", "がっこうで", "こうえんで", "えきで"], type: "イディオム", example: "I play at home. (家で遊びます)" },
-    { word: "on foot", meaning: "<ruby>徒歩<rt>とほ</rt></ruby>で・歩いて", options: ["とほで", "バスで", "でんしゃで", "じてんしゃで"], type: "イディオム", example: "I go to school on foot. (歩いて学校に行きます)" },
+    { word: "in the morning", meaning: "<ruby>午前中<rt>ごぜんちゅう</rt></ruby>・<ruby>朝<rt>あさ</rt></ruby>に", options: ["ごぜんちゅう", "ごご", "よる", "ばん"], type: "イディオム", example: "I study in the morning. (午前中に勉強します)" },
+    { word: "at home", meaning: "<ruby>家<rt>いえ</rt></ruby>で・<ruby>家<rt>いえ</rt></ruby>に", options: ["いえで", "がっこうで", "こうえんで", "えきで"], type: "イディオム", example: "I play at home. (家で遊びます)" },
+    { word: "on foot", meaning: "<ruby>徒歩<rt>とほ</rt></ruby>で・<ruby>歩<rt>ある</rt></ruby>いて", options: ["とほで", "バスで", "でんしゃで", "じてんしゃで"], type: "イディオム", example: "I go to school on foot. (歩いて学校に行きます)" },
     { word: "by bus", meaning: "バスで", options: ["バスで", "でんしゃで", "あるいて", "ひこうきで"], type: "イディオム", example: "I go by bus. (バスで行きます)" }
   ],
 
@@ -703,17 +730,17 @@ const QUESTION_DATABASE = {
     { word: "kind", meaning: "<ruby>親切<rt>しんせつ</rt></ruby>な", options: ["しんせつな", "いじわるな", "おもしろい", "静かな"], type: "単語", example: "She is very kind. (彼女はとても親切です)" },
     { word: "quiet", meaning: "<ruby>静<rt>しず</rt></ruby>かな", options: ["しずかな", "うるさい", "にぎやかな", "たのしい"], type: "単語", example: "Be quiet in the library. (図書館では静かにしなさい)" },
     { word: "noisy", meaning: "やかましい・うるさい", options: ["うるさい", "しずかな", "くらい", "あかるい"], type: "単語", example: "It is noisy outside. (外がうるさいです)" },
-    { word: "bright", meaning: "<ruby>明るい<rt>あかるい</rt></ruby>", options: ["あかるい", "くらい", "ひろい", "せまい"], type: "単語", example: "A bright room. (明るい部屋)" },
-    { word: "dark", meaning: "<ruby>暗い<rt>くらい</rt></ruby>", options: ["くらい", "あかるい", "たかい", "ひくい"], type: "単語", example: "It gets dark at six. (6時に暗くなります)" },
-    { word: "heavy", meaning: "<ruby>重い<rt>おもい</rt></ruby>", options: ["おもい", "かるい", "かたい", "やわらかい"], type: "単語", example: "This box is heavy. (この箱は重いです)" },
-    { word: "light", meaning: "<ruby>軽い<rt>かるい</rt></ruby>・ひかり", options: ["かるい", "おもい", "あつい", "つめたい"], type: "単語", example: "Feathers are light. (羽は軽いです)" },
+    { word: "bright", meaning: "<ruby>明<rt>あか</rt></ruby>るい", options: ["あかるい", "くらい", "ひろい", "せまい"], type: "単語", example: "A bright room. (明るい部屋)" },
+    { word: "dark", meaning: "<ruby>暗<rt>くら</rt></ruby>い", options: ["くらい", "あかるい", "たかい", "ひくい"], type: "単語", example: "It gets dark at six. (6時に暗くなります)" },
+    { word: "heavy", meaning: "<ruby>重<rt>おも</rt></ruby>い", options: ["おもい", "かるい", "かたい", "やわらかい"], type: "単語", example: "This box is heavy. (この箱は重いです)" },
+    { word: "light", meaning: "<ruby>軽<rt>かる</rt></ruby>い・ひかり", options: ["かるい", "おもい", "あつい", "つめたい"], type: "単語", example: "Feathers are light. (羽は軽いです)" },
 
     // イディオム
-    { word: "take a bath", meaning: "<ruby>入浴<rt>にゅうよく</rt></ruby>する（お風呂に入る）", options: ["お風呂に入る", "シャワーをあびる", "顔をあらう", "服をきる"], type: "イディオム", example: "I take a bath every day. (毎日お風呂に入ります)" },
+    { word: "take a bath", meaning: "<ruby>入浴<rt>にゅうよく</rt></ruby>する（お<ruby>風呂<rt>ふろ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>る）", options: ["お風呂に入る", "シャワーをあびる", "顔をあらう", "服をきる"], type: "イディオム", example: "I take a bath every day. (毎日お風呂に入ります)" },
     { word: "take a picture", meaning: "<ruby>写真<rt>しゃしん</rt></ruby>をとる", options: ["写真を撮る", "絵を描く", "本を買う", "電話をかける"], type: "イディオム", example: "Take a picture here. (ここで写真を撮ろう)" },
     { word: "look for", meaning: "〜を<ruby>探<rt>さが</rt></ruby>す", options: ["〜を探す", "〜を見る", "〜を聞く", "〜を捨てる"], type: "イディオム", example: "I am looking for my key. (鍵を探しています)" },
     { word: "say hello to", meaning: "〜によろしくと<ruby>伝<rt>つた</rt></ruby>える", options: ["〜によろしく伝える", "〜にお礼を言う", "〜に謝る", "〜を招待する"], type: "イディオム", example: "Say hello to your mother. (お母さんによろしくね)" },
-    { word: "be good at", meaning: "〜が得意だ", options: ["〜が得意だ", "〜が苦手だ", "〜が好きだ", "〜が嫌いだ"], type: "イディオム", example: "He is good at math. (彼は算数が得意です)" },
+    { word: "be good at", meaning: "〜が<ruby>得意<rt>とくい</rt></ruby>だ", options: ["〜が得意だ", "〜が苦手だ", "〜が好きだ", "〜が嫌いだ"], type: "イディオム", example: "He is good at math. (彼は算数が得意です)" },
     { word: "be bad at", meaning: "〜が<ruby>苦手<rt>にがて</rt></ruby>だ", options: ["〜が苦手だ", "〜が得意だ", "〜が好きだ", "〜が得意になりたい"], type: "イディオム", example: "I am bad at singing. (歌うのが苦手です)" },
     { word: "by the way", meaning: "ところで", options: ["ところで", "しかし", "だから", "たとえば"], type: "イディオム", example: "By the way, what time is it? (ところで、いま何時ですか？)" },
     { word: "for example", meaning: "<ruby>例<rt>たと</rt></ruby>えば", options: ["例えば", "つまり", "最後に", "最初に"], type: "イディオム", example: "I like fruits, for example, apples. (フルーツ、例えばリンゴが好きです)" },
@@ -721,19 +748,19 @@ const QUESTION_DATABASE = {
     { word: "in front of", meaning: "〜の<ruby>前<rt>まえ</rt></ruby>で", options: ["〜の前で", "〜の後ろで", "〜の隣で", "〜の中で"], type: "イディオム", example: "Stand in front of the door. (ドアの前に立ちなさい)" },
     { word: "next to", meaning: "〜の<ruby>隣<rt>となり</rt></ruby>に", options: ["〜の隣に", "〜の前で", "〜の後ろで", "〜の上に"], type: "イディオム", example: "He sat next to me. (彼はわたしの隣に座った)" },
     { word: "far from", meaning: "〜から<ruby>遠<rt>とお</rt></ruby>い", options: ["〜から遠い", "〜から近い", "〜の向かいの", "〜の近くの"], type: "イディオム", example: "My house is far from the station. (家は駅から遠いです)" },
-    { word: "a few", meaning: "いくつかの（少しの）", options: ["いくつかの", "たくさんの", "全くない", "すべての"], type: "イディオム", example: "I have a few friends. (友達が少しいます)" },
-    { word: "a pair of", meaning: "一組の（２つで１つの）", options: ["一組の", "３つの", "たくさんの", "半分"], type: "イディオム", example: "A pair of shoes. (一足の靴)" },
-    { word: "take off", meaning: "（服などを）脱ぐ・離陸する", options: ["脱ぐ", "着る", "洗う", "畳む"], type: "イディオム", example: "Take off your shoes. (靴を脱ぎなさい)" },
-    { word: "put on", meaning: "（服などを）着る・身につける", options: ["着る", "脱ぐ", "買ってくる", "捨てる"], type: "イディオム", example: "Put on your coat. (コートを着なさい)" },
-    { word: "get on", meaning: "（電車などに）乗る", options: ["乗る", "降りる", "歩く", "走る"], type: "イディオム", example: "Get on the train. (電車に乗りなさい)" },
-    { word: "get off", meaning: "（電車などを）降りる", options: ["降りる", "乗る", "乗り換える", "見送る"], type: "イディオム", example: "Get off at the next station. (次の駅で降りなさい)" },
+    { word: "a few", meaning: "いくつかの（<ruby>少<rt>すこ</rt></ruby>しの）", options: ["いくつかの", "たくさんの", "全くない", "すべての"], type: "イディオム", example: "I have a few friends. (友達が少しいます)" },
+    { word: "a pair of", meaning: "<ruby>一組<rt>ひとくみ</rt></ruby>の（２つで１つの）", options: ["一組の", "３つの", "たくさんの", "半分"], type: "イディオム", example: "A pair of shoes. (一足の靴)" },
+    { word: "take off", meaning: "（<ruby>服<rt>ふく</rt></ruby>などを）<ruby>脱<rt>ぬ</rt></ruby>ぐ・<ruby>離陸<rt>りりく</rt></ruby>する", options: ["脱ぐ", "着る", "洗う", "畳む"], type: "イディオム", example: "Take off your shoes. (靴を脱ぎなさい)" },
+    { word: "put on", meaning: "（<ruby>服<rt>ふく</rt></ruby>などを）<ruby>着<rt>き</rt></ruby>る・<ruby>身<rt>み</rt></ruby>につける", options: ["着る", "脱ぐ", "買ってくる", "捨てる"], type: "イディオム", example: "Put on your coat. (コートを着なさい)" },
+    { word: "get on", meaning: "（<ruby>電車<rt>でんしゃ</rt></ruby>などに）<ruby>乗<rt>の</rt></ruby>る", options: ["乗る", "降りる", "歩く", "走る"], type: "イディオム", example: "Get on the train. (電車に乗りなさい)" },
+    { word: "get off", meaning: "（<ruby>電車<rt>でんしゃ</rt></ruby>などを）<ruby>降<rt>お</rt></ruby>りる", options: ["降りる", "乗る", "乗り換える", "見送る"], type: "イディオム", example: "Get off at the next station. (次の駅で降りなさい)" },
     { word: "shake hands", meaning: "<ruby>握手<rt>あくしゅ</rt></ruby>する", options: ["握手する", "手を振る", "拍手する", "おじぎする"], type: "イディオム", example: "Let's shake hands. (握手しましょう)" },
-    { word: "write back", meaning: "<ruby>返信<rt>へんしん</rt></ruby>する・お返事をかく", options: ["返事を書く", "手紙を読む", "電話する", "メールを消す"], type: "イディオム", example: "Please write back soon. (すぐにお返事をください)" },
+    { word: "write back", meaning: "<ruby>返信<rt>へんしん</rt></ruby>する・お<ruby>返事<rt>へんじ</rt></ruby>をかく", options: ["返事を書く", "手紙を読む", "電話する", "メールを消す"], type: "イディオム", example: "Please write back soon. (すぐにお返事をください)" },
     { word: "over there", meaning: "あそこに", options: ["あそこに", "ここに", "どこかに", "向こう側に"], type: "イディオム", example: "Look over there. (あそこをごらん)" },
     { word: "wait for", meaning: "〜を<ruby>待<rt>ま</rt></ruby>つ", options: ["〜を待つ", "〜を探す", "〜を呼ぶ", "〜を見送る"], type: "イディオム", example: "Wait for me! (わたしを待って！)" },
     { word: "be interested in", meaning: "〜に<ruby>興味<rt>きょうみ</rt></ruby>がある", options: ["〜に興味がある", "〜が怖い", "〜が得意だ", "〜に飽きている"], type: "イディオム", example: "I am interested in history. (歴史に興味があります)" },
-    { word: "ask for", meaning: "〜を<ruby>求<rt>もと</rt></ruby>める・頼む", options: ["〜を求める", "〜を与える", "〜を断る", "〜を探す"], type: "イディオム", example: "Ask for help. (助けを求めなさい)" },
-    { word: "vacation", meaning: "<ruby>休暇<rt>きゅうか</rt></ruby>・休み", options: ["きゅうか", "しゅくだい", "じゅぎょう", "かいぎ"], type: "単語", example: "Summer vacation. (夏休み)" },
+    { word: "ask for", meaning: "〜を<ruby>求<rt>もと</rt></ruby>める・<ruby>頼<rt>たの</rt></ruby>む", options: ["〜を求める", "〜を与える", "〜を断る", "〜を探す"], type: "イディオム", example: "Ask for help. (助けを求めなさい)" },
+    { word: "vacation", meaning: "<ruby>休暇<rt>きゅうか</rt></ruby>・<ruby>休<rt>やす</rt></ruby>み", options: ["きゅうか", "しゅくだい", "じゅぎょう", "かいぎ"], type: "単語", example: "Summer vacation. (夏休み)" },
     { word: "homework", meaning: "<ruby>宿題<rt>しゅくだい</rt></ruby>", options: ["しゅくだい", "テスト", "じゅぎょう", "やすみ"], type: "単語", example: "Do your homework. (宿題をしなさい)" },
     { word: "dictionary", meaning: "<ruby>辞書<rt>じしょ</rt></ruby>", options: ["じしょ", "ほん", "ノート", "ちず"], type: "単語", example: "Use a dictionary. (辞書を使いなさい)" },
     { word: "newspaper", meaning: "<ruby>新聞<rt>しんぶん</rt></ruby>", options: ["しんぶん", "ざっし", "てがみ", "ほん"], type: "単語", example: "Read the newspaper. (新聞を読みなさい)" },
@@ -753,15 +780,15 @@ const QUESTION_DATABASE = {
     { word: "present", meaning: "プレゼント・<ruby>贈<rt>おく</rt></ruby>り<ruby>物<rt>もの</rt></ruby>", options: ["プレゼント", "てがみ", "カード", "ケーキ"], type: "単語", example: "A birthday present. (誕生日のプレゼント)" },
     { word: "dream", meaning: "<ruby>夢<rt>ゆめ</rt></ruby>", options: ["ゆめ", "ねむり", "よる", "あさ"], type: "単語", example: "My dream is to be a singer. (私の夢は歌手になることです)" },
     { word: "hobby", meaning: "<ruby>趣味<rt>しゅみ</rt></ruby>", options: ["しゅみ", "しごと", "しゅくだい", "スポーツ"], type: "単語", example: "My hobby is reading. (私の趣味は読書です)" },
-    { word: "arrive at", meaning: "〜に<ruby>到着<rt>とうちゃく</rt></ruby>する・着く", options: ["〜にとうちゃくする", "〜を出発する", "〜を通る", "〜を待つ"], type: "イディオム", example: "Arrive at the station. (駅に到着する)" },
+    { word: "arrive at", meaning: "〜に<ruby>到着<rt>とうちゃく</rt></ruby>する・<ruby>着<rt>つ</rt></ruby>く", options: ["〜にとうちゃくする", "〜を出発する", "〜を通る", "〜を待つ"], type: "イディオム", example: "Arrive at the station. (駅に到着する)" },
     { word: "be born", meaning: "<ruby>生<rt>う</rt></ruby>まれる", options: ["うまれる", "そだつ", "はたらく", "けっこんする"], type: "イディオム", example: "I was born in Japan. (私は日本で生まれました)" },
     { word: "each other", meaning: "お<ruby>互<rt>たが</rt></ruby>いに", options: ["おたがいに", "じぶんに", "ひとりで", "みんなで"], type: "イディオム", example: "Help each other. (お互いに助け合いなさい)" },
-    { word: "in the past", meaning: "<ruby>過去<rt>かこ</rt></ruby>に・昔は", options: ["かこに", "みらいに", "げんざいに", "しょうらいに"], type: "イディオム", example: "In the past, it was small. (昔は小さかったです)" },
+    { word: "in the past", meaning: "<ruby>過去<rt>かこ</rt></ruby>に・<ruby>昔<rt>むかし</rt></ruby>は", options: ["かこに", "みらいに", "げんざいに", "しょうらいに"], type: "イディオム", example: "In the past, it was small. (昔は小さかったです)" },
     { word: "on time", meaning: "<ruby>時間<rt>じかん</rt></ruby><ruby>通<rt>どお</rt></ruby>りに", options: ["じかんどおりに", "ちこくして", "はやく", "おそく"], type: "イディオム", example: "Come on time. (時間通りに来なさい)" },
     { word: "at once", meaning: "すぐに", options: ["すぐに", "ゆっくり", "あとで", "たまに"], type: "イディオム", example: "Come here at once. (すぐにここに来なさい)" },
     { word: "by oneself", meaning: "<ruby>一人<rt>ひとり</rt></ruby>で", options: ["ひとりで", "みんなで", "ふたりで", "ともだちと"], type: "イディオム", example: "Do it by oneself. (一人でしなさい)" },
     { word: "on the way", meaning: "<ruby>途中<rt>とちゅう</rt></ruby>で", options: ["とちゅうで", "さいごに", "さいしょに", "いえで"], type: "イディオム", example: "On the way home. (帰る途中で)" },
-    { word: "go shopping", meaning: "<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>に行く", options: ["かいものにいく", "りょこうにいく", "がっこうにいく", "さんぽにいく"], type: "イディオム", example: "Go shopping on Sunday. (日曜日に買い物に行く)" },
+    { word: "go shopping", meaning: "<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>に<ruby>行<rt>い</rt></ruby>く", options: ["かいものにいく", "りょこうにいく", "がっこうにいく", "さんぽにいく"], type: "イディオム", example: "Go shopping on Sunday. (日曜日に買い物に行く)" },
     { word: "take a walk", meaning: "<ruby>散歩<rt>さんぽ</rt></ruby>する", options: ["さんぽする", "およぐ", "はしる", "ねる"], type: "イディオム", example: "Take a walk in the park. (公園を散歩する)" }
   ],
 
@@ -792,18 +819,18 @@ const QUESTION_DATABASE = {
     { word: "safety", meaning: "<ruby>安全<rt>あんぜん</rt></ruby>", options: ["あんぜん", "きけん", "安心", "平和"], type: "単語", example: "For your safety. (あなたの安全のために)" },
     { word: "health", meaning: "<ruby>健康<rt>けんこう</rt></ruby>", options: ["けんこう", "びょうき", "体調", "運動"], type: "単語", example: "Health is important. (健康は大切です)" },
     { word: "disease", meaning: "<ruby>病気<rt>びょうき</rt></ruby>", options: ["びょうき", "けが", "けんこう", "薬"], type: "単語", example: "Prevent disease. (病気を予防する)" },
-    { word: "medicine", meaning: "<ruby>薬<rt>くすり</rt></ruby>・医学", options: ["くすり", "びょういん", "いしゃ", "ちりょう"], type: "単語", example: "Take medicine. (薬を飲む)" },
-    { word: "patient", meaning: "<ruby>患者<rt>かんじゃ</rt></ruby>・忍耐強い", options: ["かんじゃ", "いしゃ", "かんごし", "客"], type: "単語", example: "The doctor examines patients. (医師が患者を診察する)" },
+    { word: "medicine", meaning: "<ruby>薬<rt>くすり</rt></ruby>・<ruby>医学<rt>いがく</rt></ruby>", options: ["くすり", "びょういん", "いしゃ", "ちりょう"], type: "単語", example: "Take medicine. (薬を飲む)" },
+    { word: "patient", meaning: "<ruby>患者<rt>かんじゃ</rt></ruby>・<ruby>忍耐<rt>にんたい</rt></ruby><ruby>強<rt>つよ</rt></ruby>い", options: ["かんじゃ", "いしゃ", "かんごし", "客"], type: "単語", example: "The doctor examines patients. (医師が患者を診察する)" },
     { word: "symptom", meaning: "<ruby>症状<rt>しょうじょう</rt></ruby>", options: ["しょうじょう", "びょうき", "原因", "結果"], type: "単語", example: "Flu symptoms. (インフルエンザの症状)" },
     { word: "accident", meaning: "<ruby>事故<rt>じこ</rt></ruby>", options: ["じこ", "事件", "災害", "火事"], type: "単語", example: "Traffic accident. (交通事故)" },
     { word: "traffic", meaning: "<ruby>交通<rt>こうつう</rt></ruby>", options: ["こうつう", "道路", "乗り物", "信号"], type: "単語", example: "Heavy traffic. (激しい交通量)" },
     { word: "signal", meaning: "<ruby>信号<rt>しんごう</rt></ruby>", options: ["しんごう", "看板", "道路", "標識"], type: "単語", example: "Red signal. (赤信号)" },
     { word: "passenger", meaning: "<ruby>乗客<rt>じょうきゃく</rt></ruby>", options: ["じょうきゃく", "うんてんしゅ", "歩行者", "ガイド"], type: "単語", example: "Train passengers. (電車の乗客)" },
     { word: "pedestrian", meaning: "<ruby>歩行者<rt>ほこうしゃ</rt></ruby>", options: ["ほこうしゃ", "じょうきゃく", "うんてんしゅ", "警察"], type: "単語", example: "Pedestrian crossing. (横断歩道)" },
-    { word: "vehicle", meaning: "<ruby>乗り物<rt>のりもの</rt></ruby>", options: ["のりもの", "建物", "道具", "機械"], type: "単語", example: "Electric vehicle. (電気自動車)" },
+    { word: "vehicle", meaning: "<ruby>乗<rt>の</rt></ruby>り<ruby>物<rt>もの</rt></ruby>", options: ["のりもの", "建物", "道具", "機械"], type: "単語", example: "Electric vehicle. (電気自動車)" },
     { word: "experience", meaning: "<ruby>経験<rt>けいけん</rt></ruby>", options: ["けいけん", "知識", "技術", "練習"], type: "単語", example: "A valuable experience. (貴重な経験)" },
     { word: "knowledge", meaning: "<ruby>知識<rt>ちしき</rt></ruby>", options: ["ちしき", "けいけん", "記憶", "考え"], type: "単語", example: "Gain knowledge. (知識を得る)" },
-    { word: "memory", meaning: "<ruby>記憶<rt>きおく</rt></ruby>・思い出", options: ["きおく", "ちしき", "夢", "考え"], type: "単語", example: "Sweet memories. (楽しい思い出)" },
+    { word: "memory", meaning: "<ruby>記憶<rt>きおく</rt></ruby>・<ruby>思<rt>おも</rt></ruby>い<ruby>出<rt>で</rt></ruby>", options: ["きおく", "ちしき", "夢", "考え"], type: "単語", example: "Sweet memories. (楽しい思い出)" },
     { word: "imagination", meaning: "<ruby>想像力<rt>そうぞうりょく</rt></ruby>", options: ["そうぞうりょく", "記憶力", "集中力", "思考力"], type: "単語", example: "Use your imagination. (想像力を働かせなさい)" },
     { word: "creativity", meaning: "<ruby>創造性<rt>そうぞうせい</rt></ruby>", options: ["そうぞうせい", "技術", "能力", "経験"], type: "単語", example: "Artistic creativity. (芸術的な創造性)" },
     { word: "ability", meaning: "<ruby>能力<rt>のうりょく</rt></ruby>", options: ["のうりょく", "技術", "知識", "経験"], type: "単語", example: "Athletic ability. (運動能力)" },
@@ -811,30 +838,30 @@ const QUESTION_DATABASE = {
     { word: "success", meaning: "<ruby>成功<rt>せいこう</rt></ruby>", options: ["せいこう", "しっぱい", "努力", "勝利"], type: "単語", example: "Wish you success. (成功を祈ります)" },
 
     // イディオム
-    { word: "look forward to", meaning: "〜を<ruby>楽しみに待つ<rt>たのしみにまつ</rt></ruby>", options: ["〜を楽しみに待つ", "〜を思い出す", "〜を諦める", "〜を探す"], type: "イディオム", example: "I am looking forward to seeing you. (あなたに会えるのを楽しみにしています)" },
-    { word: "take care of", meaning: "〜の<ruby>世話をする<rt>せわをする</rt></ruby>", options: ["〜の世話をする", "〜に注意する", "〜を観察する", "〜を捨てる"], type: "イディオム", example: "Take care of your dog. (犬の世話をしなさい)" },
-    { word: "give up", meaning: "<ruby>諦める<rt>あきらめる</rt></ruby>", options: ["諦める", "続ける", "始める", "やり直す"], type: "イディオム", example: "Don't give up! (諦めないで！)" },
-    { word: "run out of", meaning: "〜を<ruby>使い果たす<rt>つかいはたす</rt></ruby>", options: ["〜を使い果たす", "〜を見つける", "〜を捨てる", "〜をためる"], type: "イディオム", example: "We ran out of water. (水を使い果たしてしまった)" },
-    { word: "catch up with", meaning: "〜に<ruby>追いつく<rt>おいつく</rt></ruby>", options: ["〜に追いつく", "〜を追いこす", "〜から逃げる", "〜を待つ"], type: "イディオム", example: "Run fast to catch up with him. (彼に追いつくために速く走りなさい)" },
-    { word: "keep in touch", meaning: "<ruby>連絡を取り合う<rt>れんらくをとりあう</rt></ruby>", options: ["連絡を取り合う", "約束を守る", "秘密にする", "ケンカする"], type: "イディオム", example: "Let's keep in touch. (これからも連絡を取り合おうね)" },
-    { word: "make up one's mind", meaning: "<ruby>決心する<rt>けっしんする</rt></ruby>", options: ["決心する", "悩む", "諦める", "変更する"], type: "イディオム", example: "He made up his mind. (彼は決心した)" },
-    { word: "take part in", meaning: "〜に<ruby>参加する<rt>さんかする</rt></ruby>", options: ["〜に参加する", "〜を見学する", "〜を欠席する", "〜を応援する"], type: "イディオム", example: "Take part in the race. (レースに参加する)" },
-    { word: "as soon as possible", meaning: "できるだけ<ruby>早く<rt>はやく</rt></ruby>", options: ["できるだけ早く", "ゆっくりと", "後で", "準備ができたら"], type: "イディオム", example: "Come here as soon as possible. (できるだけ早くここに来てください)" },
+    { word: "look forward to", meaning: "〜を<ruby>楽<rt>たの</rt></ruby>しみに<ruby>待<rt>ま</rt></ruby>つ", options: ["〜を楽しみに待つ", "〜を思い出す", "〜を諦める", "〜を探す"], type: "イディオム", example: "I am looking forward to seeing you. (あなたに会えるのを楽しみにしています)" },
+    { word: "take care of", meaning: "〜の<ruby>世話<rt>せわ</rt></ruby>をする", options: ["〜の世話をする", "〜に注意する", "〜を観察する", "〜を捨てる"], type: "イディオム", example: "Take care of your dog. (犬の世話をしなさい)" },
+    { word: "give up", meaning: "<ruby>諦<rt>あきら</rt></ruby>める", options: ["諦める", "続ける", "始める", "やり直す"], type: "イディオム", example: "Don't give up! (諦めないで！)" },
+    { word: "run out of", meaning: "〜を<ruby>使<rt>つか</rt></ruby>い<ruby>果<rt>は</rt></ruby>たす", options: ["〜を使い果たす", "〜を見つける", "〜を捨てる", "〜をためる"], type: "イディオム", example: "We ran out of water. (水を使い果たしてしまった)" },
+    { word: "catch up with", meaning: "〜に<ruby>追<rt>お</rt></ruby>いつく", options: ["〜に追いつく", "〜を追いこす", "〜から逃げる", "〜を待つ"], type: "イディオム", example: "Run fast to catch up with him. (彼に追いつくために速く走りなさい)" },
+    { word: "keep in touch", meaning: "<ruby>連絡<rt>れんらく</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>合<rt>あ</rt></ruby>う", options: ["連絡を取り合う", "約束を守る", "秘密にする", "ケンカする"], type: "イディオム", example: "Let's keep in touch. (これからも連絡を取り合おうね)" },
+    { word: "make up one's mind", meaning: "<ruby>決心<rt>けっしん</rt></ruby>する", options: ["決心する", "悩む", "諦める", "変更する"], type: "イディオム", example: "He made up his mind. (彼は決心した)" },
+    { word: "take part in", meaning: "〜に<ruby>参加<rt>さんか</rt></ruby>する", options: ["〜に参加する", "〜を見学する", "〜を欠席する", "〜を応援する"], type: "イディオム", example: "Take part in the race. (レースに参加する)" },
+    { word: "as soon as possible", meaning: "できるだけ<ruby>早<rt>はや</rt></ruby>く", options: ["できるだけ早く", "ゆっくりと", "後で", "準備ができたら"], type: "イディオム", example: "Come here as soon as possible. (できるだけ早くここに来てください)" },
     { word: "in order to", meaning: "〜するために", options: ["〜するために", "〜した結果", "〜にかかわらず", "〜の代わりに"], type: "イディオム", example: "Study hard in order to pass. (合格するために一生懸命勉強する)" },
     { word: "so that", meaning: "〜するために", options: ["〜するために", "〜なので", "〜だけれども", "〜のように"], type: "イディオム", example: "Speak loudly so that everyone can hear. (みんなに聞こえるように大きな声で話しなさい)" },
-    { word: "because of", meaning: "〜のために（理由）", options: ["〜のために", "〜にもかかわらず", "〜の代わりに", "〜のせいでなく"], type: "イディオム", example: "Late because of heavy rain. (大雨のために遅刻した)" },
-    { word: "instead of", meaning: "〜の<ruby>代わりに<rt>かわりに</rt></ruby>", options: ["〜の代わりに", "〜と一緒に", "〜の前に", "〜の後に"], type: "イディオム", example: "Use water instead of milk. (牛乳の代わりに水を使う)" },
-    { word: "according to", meaning: "〜に<ruby>よると<rt>よると</rt></ruby>", options: ["〜によると", "〜に反対して", "〜に従わずに", "〜を問わず"], type: "イディオム", example: "According to the weather report. (天気予報によると)" },
-    { word: "by accident", meaning: "<ruby>偶然に<rt>ぐうぜんに</rt></ruby>", options: ["偶然に", "故意に", "わざと", "必然的に"], type: "イディオム", example: "Met her by accident. (彼女に偶然出会った)" },
-    { word: "on purpose", meaning: "<ruby>わざと<rt>わざと</rt></ruby>・故意に", options: ["わざと", "偶然に", "間違えて", "うっかり"], type: "イディオム", example: "He broke it on purpose. (彼はそれをわざと壊した)" },
-    { word: "in fact", meaning: "<ruby>実際に<rt>じっさいに</rt></ruby>・実は", options: ["実際に", "反対に", "例として", "結論として"], type: "イディオム", example: "In fact, it is true. (実際に、それは本当です)" },
-    { word: "as a result", meaning: "<ruby>結果として<rt>けっかとして</rt></ruby>", options: ["結果として", "原因として", "代わりに", "最初に"], type: "イディオム", example: "As a result, he won. (結果として、彼は勝った)" },
-    { word: "at first", meaning: "<ruby>最初は<rt>さいしょは</rt></ruby>", options: ["最初は", "最後は", "ついに", "突然"], type: "イディオム", example: "At first, it was difficult. (最初は難しかった)" },
-    { word: "at last", meaning: "<ruby>ついに<rt>ついに</rt></ruby>・最後に", options: ["ついに", "最初は", "途中で", "たまに"], type: "イディオム", example: "At last, we arrived. (ついに到着した)" },
-    { word: "little by little", meaning: "<ruby>少しずつ<rt>すこしずつ</rt></ruby>", options: ["少しずつ", "一気に", "突然", "徐々にでなく"], type: "イディオム", example: "Improve little by little. (少しずつ上達する)" },
-    { word: "step by step", meaning: "<ruby>一歩ずつ<rt>いっぽずつ</rt></ruby>", options: ["一歩ずつ", "急速に", "飛ばして", "ランダムに"], type: "イディオム", example: "Learn step by step. (一歩ずつ学ぶ)" },
-    { word: "all of a sudden", meaning: "<ruby>突然に<rt>とつぜんに</rt></ruby>", options: ["突然に", "ゆっくりと", "予定通り", "静かに"], type: "イディオム", example: "All of a sudden, it started to rain. (突然、雨が降り出した)" },
-    { word: "make a mistake", meaning: "<ruby>間違える<rt>まちがえる</rt></ruby>", options: ["間違える", "成功する", "直す", "見つける"], type: "イディオム", example: "Don't be afraid to make a mistake. (間違えるのを恐れないで)" },
+    { word: "because of", meaning: "〜のために（<ruby>理由<rt>りゆう</rt></ruby>）", options: ["〜のために", "〜にもかかわらず", "〜の代わりに", "〜のせいでなく"], type: "イディオム", example: "Late because of heavy rain. (大雨のために遅刻した)" },
+    { word: "instead of", meaning: "〜の<ruby>代<rt>か</rt></ruby>わりに", options: ["〜の代わりに", "〜と一緒に", "〜の前に", "〜の後に"], type: "イディオム", example: "Use water instead of milk. (牛乳の代わりに水を使う)" },
+    { word: "according to", meaning: "〜によると", options: ["〜によると", "〜に反対して", "〜に従わずに", "〜を問わず"], type: "イディオム", example: "According to the weather report. (天気予報によると)" },
+    { word: "by accident", meaning: "<ruby>偶然<rt>ぐうぜん</rt></ruby>に", options: ["偶然に", "故意に", "わざと", "必然的に"], type: "イディオム", example: "Met her by accident. (彼女に偶然出会った)" },
+    { word: "on purpose", meaning: "わざと・<ruby>故意<rt>こい</rt></ruby>に", options: ["わざと", "偶然に", "間違えて", "うっかり"], type: "イディオム", example: "He broke it on purpose. (彼はそれをわざと壊した)" },
+    { word: "in fact", meaning: "<ruby>実際<rt>じっさい</rt></ruby>に・<ruby>実<rt>じつ</rt></ruby>は", options: ["実際に", "反対に", "例として", "結論として"], type: "イディオム", example: "In fact, it is true. (実際に、それは本当です)" },
+    { word: "as a result", meaning: "<ruby>結果<rt>けっか</rt></ruby>として", options: ["結果として", "原因として", "代わりに", "最初に"], type: "イディオム", example: "As a result, he won. (結果として、彼は勝った)" },
+    { word: "at first", meaning: "<ruby>最初<rt>さいしょ</rt></ruby>は", options: ["最初は", "最後は", "ついに", "突然"], type: "イディオム", example: "At first, it was difficult. (最初は難しかった)" },
+    { word: "at last", meaning: "ついに・<ruby>最後<rt>さいご</rt></ruby>に", options: ["ついに", "最初は", "途中で", "たまに"], type: "イディオム", example: "At last, we arrived. (ついに到着した)" },
+    { word: "little by little", meaning: "<ruby>少<rt>すこ</rt></ruby>しずつ", options: ["少しずつ", "一気に", "突然", "徐々にでなく"], type: "イディオム", example: "Improve little by little. (少しずつ上達する)" },
+    { word: "step by step", meaning: "<ruby>一歩<rt>いっぽ</rt></ruby>ずつ", options: ["一歩ずつ", "急速に", "飛ばして", "ランダムに"], type: "イディオム", example: "Learn step by step. (一歩ずつ学ぶ)" },
+    { word: "all of a sudden", meaning: "<ruby>突然<rt>とつぜん</rt></ruby>に", options: ["突然に", "ゆっくりと", "予定通り", "静かに"], type: "イディオム", example: "All of a sudden, it started to rain. (突然、雨が降り出した)" },
+    { word: "make a mistake", meaning: "<ruby>間違<rt>まちが</rt></ruby>える", options: ["間違える", "成功する", "直す", "見つける"], type: "イディオム", example: "Don't be afraid to make a mistake. (間違えるのを恐れないで)" },
     { word: "benefit", meaning: "<ruby>利益<rt>りえき</rt></ruby>", options: ["りえき", "そんしつ", "ひよう", "よさん"], type: "単語", example: "The benefit of exercise. (運動の利益)" },
     { word: "advantage", meaning: "<ruby>利点<rt>りてん</rt></ruby>", options: ["りてん", "けってん", "もんだい", "げんいん"], type: "単語", example: "A big advantage. (大きな利点)" },
     { word: "behavior", meaning: "<ruby>行動<rt>こうどう</rt></ruby>", options: ["こうどう", "かんがえ", "ことば", "かんじょう"], type: "単語", example: "Polite behavior. (礼儀正しい行動)" },
@@ -850,12 +877,12 @@ const QUESTION_DATABASE = {
     { word: "responsibility", meaning: "<ruby>責任<rt>せきにん</rt></ruby>", options: ["せきにん", "ぎむ", "けんり", "じゆう"], type: "単語", example: "Have responsibility. (責任を持つ)" },
     { word: "communication", meaning: "コミュニケーション・<ruby>意思疎通<rt>いしそつう</rt></ruby>", options: ["コミュニケーション", "じょうほう", "かいわ", "でんたつ"], type: "単語", example: "Communication is important. (コミュニケーションは大切です)" },
     { word: "global", meaning: "<ruby>世界的<rt>せかいてき</rt></ruby>な", options: ["せかいてきな", "こくないの", "ちほうの", "こじんてきな"], type: "単語", example: "A global problem. (世界的な問題)" },
-    { word: "local", meaning: "<ruby>地方<rt>ちほう</rt></ruby>の・地元の", options: ["ちほうの", "がいこくの", "せかいの", "としの"], type: "単語", example: "Local food. (地元の食べ物)" },
+    { word: "local", meaning: "<ruby>地方<rt>ちほう</rt></ruby>の・<ruby>地元<rt>じもと</rt></ruby>の", options: ["ちほうの", "がいこくの", "せかいの", "としの"], type: "単語", example: "Local food. (地元の食べ物)" },
     { word: "necessary", meaning: "<ruby>必要<rt>ひつよう</rt></ruby>な", options: ["ひつような", "むだな", "かのうな", "ふかのうな"], type: "単語", example: "It is necessary to study. (勉強することが必要です)" },
     { word: "possible", meaning: "<ruby>可能<rt>かのう</rt></ruby>な", options: ["かのうな", "ふかのうな", "ひつような", "かんたんな"], type: "単語", example: "As soon as possible. (できるだけ早く)" },
     { word: "serious", meaning: "<ruby>深刻<rt>しんこく</rt></ruby>な", options: ["しんこくな", "かるい", "たのしい", "へいわな"], type: "単語", example: "A serious problem. (深刻な問題)" },
     { word: "improve", meaning: "<ruby>改善<rt>かいぜん</rt></ruby>する", options: ["かいぜんする", "あっかさせる", "へらす", "とめる"], type: "単語", example: "Improve your skills. (スキルを改善する)" },
-    { word: "depend on", meaning: "〜に<ruby>依存<rt>いぞん</rt></ruby>する・〜次第だ", options: ["〜にいぞんする", "〜に反対する", "〜を避ける", "〜を選ぶ"], type: "イディオム", example: "It depends on the weather. (天気次第です)" },
+    { word: "depend on", meaning: "〜に<ruby>依存<rt>いぞん</rt></ruby>する・〜<ruby>次第<rt>しだい</rt></ruby>だ", options: ["〜にいぞんする", "〜に反対する", "〜を避ける", "〜を選ぶ"], type: "イディオム", example: "It depends on the weather. (天気次第です)" },
     { word: "be related to", meaning: "〜に<ruby>関係<rt>かんけい</rt></ruby>がある", options: ["〜にかんけいがある", "〜に似ている", "〜と違う", "〜に含まれる"], type: "イディオム", example: "Be related to health. (健康に関係がある)" },
     { word: "take action", meaning: "<ruby>行動<rt>こうどう</rt></ruby>を<ruby>起<rt>お</rt></ruby>こす", options: ["こうどうをおこす", "けいかくを立てる", "けっかを待つ", "もんだいを話す"], type: "イディオム", example: "Take action now. (今すぐ行動を起こしなさい)" },
     { word: "in addition", meaning: "その<ruby>上<rt>うえ</rt></ruby>・さらに", options: ["そのうえ", "しかし", "だから", "たとえば"], type: "イディオム", example: "In addition, it is cheap. (その上、安いです)" },
@@ -1049,6 +1076,12 @@ function checkAnswer(selected, correct, clickedBtn) {
 
   // 「つぎの問題へ」ボタンを表示
   document.getElementById('nextBtn').classList.add('active');
+
+  // 解説が画面外にある場合は自動で見える位置までスクロールする
+  // （ボタン自体は画面下部に固定表示されるので、押すための操作は不要）
+  requestAnimationFrame(() => {
+    document.getElementById('explainCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 }
 
 // 次の問題へ
