@@ -389,6 +389,19 @@
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
     }
 
+    /* 回答後だけ表示する余白。固定ボタン（高さ約53px＋下余白12px）より
+       大きく確保し、解説カードがボタンの裏に隠れないようにする。
+       要素の大きさ自体は一切変えない。 */
+    .next-spacer {
+      display: none;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    .next-spacer.active {
+      display: block;
+    }
+
     /* クリア・結果画面 */
     .result-box {
       background: white;
@@ -551,6 +564,7 @@
       </div>
 
       <button class="next-btn" id="nextBtn" onclick="nextQuestion()">つぎの問題へ ➔</button>
+      <div class="next-spacer" id="nextSpacer"></div>
     </div>
 
     <!-- クリア結果画面 -->
@@ -1004,6 +1018,7 @@ function renderQuestion() {
   // 解説カード＆つぎへボタンの初期化
   document.getElementById('explainCard').classList.remove('active');
   document.getElementById('nextBtn').classList.remove('active');
+  document.getElementById('nextSpacer').classList.remove('active');
 
   // 選択肢作成 (正解1つ + 不正解3つ)
   const container = document.getElementById('optionsContainer');
@@ -1074,8 +1089,9 @@ function checkAnswer(selected, correct, clickedBtn) {
   document.getElementById('explainExample').textContent = q.example;
   document.getElementById('explainCard').classList.add('active');
 
-  // 「つぎの問題へ」ボタンを表示
+  // 「つぎの問題へ」ボタンを表示（あわせてボタン分の余白も確保する）
   document.getElementById('nextBtn').classList.add('active');
+  document.getElementById('nextSpacer').classList.add('active');
 
   // 解説が画面外にある場合は自動で見える位置までスクロールする
   // （ボタン自体は画面下部に固定表示されるので、押すための操作は不要）
