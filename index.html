@@ -171,6 +171,25 @@
     .btn-grade-4 { border-color: #FFD166; color: #D68910; }
     .btn-grade-3 { border-color: #FF6B6B; color: #C0392B; }
 
+    /* 級ボタンは「級名／補足」の2段組みに固定し、途中で改行させない */
+    .btn-grade {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 2px;
+      padding: 12px 16px;
+    }
+
+    .grade-name {
+      white-space: nowrap;
+    }
+
+    .grade-sub {
+      white-space: nowrap;
+      font-size: 0.85rem;
+      font-weight: normal;
+    }
+
     .btn-dict {
       background: #34495E;
       color: white;
@@ -502,6 +521,45 @@
       letter-spacing: 0;
       color: #718096;
     }
+
+    /* ふりがな付き文字が下がって見える問題への対策:
+       意味表示は ruby をそのまま使わず、全セグメントを
+       「ふりがな行＋本文行」の2段に組み替えて表示する。
+       ふりがなのない文字にも同じ高さのふりがな行（空白）を確保するので、
+       全ての文字の本文が必ず同じ高さにそろう。 */
+    .frow {
+      display: inline-flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .seg {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .frt {
+      font-size: 0.58em;
+      line-height: 1.15;
+      height: 1.15em;
+      letter-spacing: 0;
+      color: #718096;
+      white-space: nowrap;
+    }
+
+    .fbs {
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    #explainMeaning {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      column-gap: 6px;
+    }
   </style>
 </head>
 <body>
@@ -521,17 +579,17 @@
       </div>
 
       <div class="menu-group">
-        <button class="btn btn-grade-5" onclick="startGame(5)">
-          <span>英検 5級レベル</span>
-          <span style="font-size:0.85rem; font-weight:normal;">(基礎単語・イディオム 98問)</span>
+        <button class="btn btn-grade btn-grade-5" onclick="startGame(5)">
+          <span class="grade-name">英検 5級レベル</span>
+          <span class="grade-sub">(基礎単語・イディオム 98問)</span>
         </button>
-        <button class="btn btn-grade-4" onclick="startGame(4)">
-          <span>英検 4級レベル</span>
-          <span style="font-size:0.85rem; font-weight:normal;">(日常生活・過去形 97問)</span>
+        <button class="btn btn-grade btn-grade-4" onclick="startGame(4)">
+          <span class="grade-name">英検 4級レベル</span>
+          <span class="grade-sub">(日常生活・過去形 97問)</span>
         </button>
-        <button class="btn btn-grade-3" onclick="startGame(3)">
-          <span>英検 3級レベル</span>
-          <span style="font-size:0.85rem; font-weight:normal;">(中学レベル・重要熟語 96問)</span>
+        <button class="btn btn-grade btn-grade-3" onclick="startGame(3)">
+          <span class="grade-name">英検 3級レベル</span>
+          <span class="grade-sub">(中学レベル・重要熟語 96問)</span>
         </button>
         <button class="btn btn-dict" onclick="openDictionary()">
           <span>📖 えいご単語ずかん</span>
@@ -989,6 +1047,39 @@ function shuffleArray(array) {
   return arr;
 }
 
+// 意味のHTML（ruby入り）を、全文字の本文の高さがそろう表示用DOMに組み替える
+// ・漢字セグメント: ふりがな行に読み、本文行に漢字
+// ・かな等のセグメント: ふりがな行は空白（高さは確保）、本文行にそのまま表示
+function furiganaHTML(html) {
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  const row = document.createElement('span');
+  row.className = 'frow';
+  [...tpl.content.childNodes].forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE && node.textContent === '') return;
+    const seg = document.createElement('span');
+    seg.className = 'seg';
+    const rt = document.createElement('span');
+    rt.className = 'frt';
+    const bs = document.createElement('span');
+    bs.className = 'fbs';
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'RUBY') {
+      const rtEl = node.querySelector('rt');
+      rt.textContent = rtEl ? rtEl.textContent : '';
+      bs.textContent = [...node.childNodes]
+        .filter(n => !(n.nodeType === Node.ELEMENT_NODE && n.tagName === 'RT'))
+        .map(n => n.textContent).join('');
+    } else {
+      rt.textContent = '';
+      bs.textContent = node.textContent;
+    }
+    seg.appendChild(rt);
+    seg.appendChild(bs);
+    row.appendChild(seg);
+  });
+  return row;
+}
+
 // ゲーム開始
 function startGame(grade) {
   currentGrade = grade;
@@ -1043,7 +1134,7 @@ function renderQuestion() {
   choices.forEach(choice => {
     const btn = document.createElement('button');
     btn.className = 'opt-btn';
-    btn.innerHTML = choice.html;
+    btn.appendChild(furiganaHTML(choice.html));
     btn.dataset.value = choice.text;
     btn.onclick = () => checkAnswer(choice.text, q.options[0], btn);
     container.appendChild(btn);
@@ -1085,7 +1176,9 @@ function checkAnswer(selected, correct, clickedBtn) {
   }
 
   // 解説を表示
-  document.getElementById('explainMeaning').innerHTML = `<strong>意味:</strong> ${q.meaning}`;
+  const explainMeaningEl = document.getElementById('explainMeaning');
+  explainMeaningEl.innerHTML = '<strong>意味:</strong>';
+  explainMeaningEl.appendChild(furiganaHTML(q.meaning));
   document.getElementById('explainExample').textContent = q.example;
   document.getElementById('explainCard').classList.add('active');
 
@@ -1157,13 +1250,14 @@ function filterDict(grade, tabElem) {
     item.innerHTML = `
       <div>
         <div class="dict-en">${q.word} <span style="font-size:0.75rem; color:#888;">(${q.type})</span></div>
-        <div class="dict-jp">${q.meaning}</div>
+        <div class="dict-jp"></div>
       </div>
       <div class="dict-right">
         <button class="dict-speak-btn" title="発音をきく">🔊</button>
         <div class="dict-star ${isLearned ? 'learned' : ''}">${isLearned ? '★ マスター' : '☆'}</div>
       </div>
     `;
+    item.querySelector('.dict-jp').appendChild(furiganaHTML(q.meaning));
     item.querySelector('.dict-speak-btn').onclick = () => speakText(q.word);
     listContainer.appendChild(item);
   });
