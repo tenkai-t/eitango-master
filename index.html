@@ -1579,5 +1579,14 @@ function filterDict(grade, tabElem) {
 refreshHome();
 </script>
 
+<script>
+// オフライン対応（Service Worker登録）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
 </body>
 </html>
