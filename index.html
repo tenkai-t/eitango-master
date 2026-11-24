@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>英単語マスター - 英検単語・イディオム学習</title>
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
@@ -41,6 +41,8 @@
       align-items: center;
       min-height: 100vh;
       padding: 12px;
+      /* ダブルタップでのズームを無効化する（スクロールはそのまま可能） */
+      touch-action: manipulation;
     }
 
     #app {
