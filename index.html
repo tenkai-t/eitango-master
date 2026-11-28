@@ -1500,10 +1500,32 @@ let answerLog = [];
 // サウンドエフェクト (Web Audio API)
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function playSound(type) {
-  if (audioCtx.state === 'suspended') {
+// iOSなどでは、読み込み直後のAudioContextは止まったまま（suspended）で、
+// 答えた瞬間に再開しようとすると音が遅れて聞こえる。
+// ユーザーが画面に触れるたびに再開しておき、さらに最初のタップで
+// 無音を一瞬流して音の通り道を開いておくことで、答えた直後に鳴らせる。
+let audioWarmedUp = false;
+function unlockAudio() {
+  if (audioCtx.state !== 'running') {
     audioCtx.resume();
   }
+  if (!audioWarmedUp) {
+    audioWarmedUp = true;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  }
+}
+document.addEventListener('pointerdown', unlockAudio);
+document.addEventListener('touchend', unlockAudio);
+
+function playSound(type) {
+  unlockAudio();
+  const t0 = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   osc.connect(gain);
@@ -1511,21 +1533,21 @@ function playSound(type) {
 
   if (type === 'correct') {
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.4);
+    osc.frequency.setValueAtTime(523.25, t0); // C5
+    osc.frequency.setValueAtTime(659.25, t0 + 0.1); // E5
+    osc.frequency.setValueAtTime(783.99, t0 + 0.2); // G5
+    gain.gain.setValueAtTime(0.2, t0);
+    gain.gain.exponentialRampToValueAtTime(0.01, t0 + 0.4);
+    osc.start(t0);
+    osc.stop(t0 + 0.4);
   } else if (type === 'wrong') {
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
-    osc.frequency.setValueAtTime(196, audioCtx.currentTime + 0.15); // G3
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
+    osc.frequency.setValueAtTime(220, t0); // A3
+    osc.frequency.setValueAtTime(196, t0 + 0.15); // G3
+    gain.gain.setValueAtTime(0.2, t0);
+    gain.gain.exponentialRampToValueAtTime(0.01, t0 + 0.3);
+    osc.start(t0);
+    osc.stop(t0 + 0.3);
   }
 }
 
